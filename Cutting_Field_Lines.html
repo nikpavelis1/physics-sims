@@ -1,9 +1,4 @@
-<!doctype html>
-<html lang="en">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Cutting Field Lines</title>
+<!doctype html>\n<html lang="en">\n<head>\n<meta charset="utf-8">\n<meta name="viewport" content="width=device-width,initial-scale=1">\n<title>Cutting Field Lines</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700&family=JetBrains+Mono:wght@500&display=swap">
 <style>
 /* Layout: lab bench on the left (canvas), controls panel on the right; stacks at phone width */
@@ -56,14 +51,12 @@ ul.rules{margin:0;padding-left:18px}
 ul.rules li{margin:4px 0}
 ul.rules b{color:var(--accent)}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
-</style>
-</head>
-<body>
+</style>\n</head>\n<body>
 
 <div class="wrap">
   <header>
     <h1>Generating electricity by cutting field lines</h1>
-    <p>Drag the wire up and down through the gap, or press Sweep.</p>
+    <p>Drag the wire up and down through the gap, or press Sweep. The bulb glows brighter as the EMF grows.</p>
   </header>
 
   <div class="grid">
@@ -280,6 +273,7 @@ ul.rules b{color:var(--accent)}
         let i=0;while(s>segs[i]){s-=segs[i];i++;}
         const t=s/segs[i],x=pts[i][0]+(pts[i+1][0]-pts[i][0])*t,y=pts[i][1]+(pts[i+1][1]-pts[i][1])*t;
         if(x>meter.x&&x<meter.x+meter.w&&Math.abs(y-my)<2)continue;
+        if(Math.hypot(x-(rx+60),y-340)<22)continue;
         ctx.beginPath();ctx.arc(x,y,4,0,Math.PI*2);ctx.fill();
       }
     }
@@ -291,6 +285,25 @@ ul.rules b{color:var(--accent)}
       ctx.lineWidth=5;ctx.strokeStyle=accent;ctx.fillStyle=accent;
       ctx.beginPath();ctx.moveTo(ax,ay+(up?22:-22));ctx.lineTo(ax,ay-(up?22:-22));ctx.stroke();
       ctx.beginPath();ctx.moveTo(ax,ay-(up?34:-34));ctx.lineTo(ax-10,ay-(up?18:-18));ctx.lineTo(ax+10,ay-(up?18:-18));ctx.closePath();ctx.fill();
+    }
+
+    // Bulb on the right-hand lead: brightness follows the size of the EMF (0 to about 60 mV)
+    {
+      const bx=rx+60, by=340, br=22, bright=Math.min(1,Math.pow(Math.abs(mV)/60,0.6));
+      if(bright>0.01){
+        const R=br+20+110*bright;
+        const g=ctx.createRadialGradient(bx,by,br*0.5,bx,by,R);
+        g.addColorStop(0,'rgba(255,230,120,'+(0.95*bright)+')');g.addColorStop(0.4,'rgba(255,200,60,'+(0.45*bright)+')');g.addColorStop(1,'rgba(255,200,60,0)');
+        ctx.fillStyle=g;ctx.beginPath();ctx.arc(bx,by,R,0,Math.PI*2);ctx.fill();
+      }
+      // glass: dark grey when off, through orange to near-white at full brightness
+      const r=Math.round(90+165*Math.min(1,bright*1.3)), gch=Math.round(90+150*bright), b=Math.round(90+ (bright>0.7?(bright-0.7)/0.3*140:0));
+      ctx.fillStyle='rgb('+r+','+gch+','+b+')';
+      ctx.strokeStyle=fg;ctx.lineWidth=2.5;ctx.beginPath();ctx.arc(bx,by,br,0,Math.PI*2);ctx.fill();ctx.stroke();
+      const k=br*0.62;ctx.strokeStyle=bright>0.5?'#fff5c0':(bright>0.15?'#a04a00':fg);ctx.lineWidth=bright>0.5?3:2;
+      ctx.beginPath();ctx.moveTo(bx-k,by-k);ctx.lineTo(bx+k,by+k);ctx.moveTo(bx-k,by+k);ctx.lineTo(bx+k,by-k);ctx.stroke();
+      ctx.fillStyle=muted;ctx.font='600 12px "Source Sans 3",system-ui,sans-serif';ctx.textAlign='left';ctx.textBaseline='middle';
+      ctx.fillText(bright<0.01?'bulb: off':bright<0.3?'bulb: dim':bright<0.7?'bulb: bright':'bulb: very bright',bx+br+8,by);
     }
 
     // Meter
@@ -320,6 +333,4 @@ ul.rules b{color:var(--accent)}
   requestAnimationFrame(frame);
 })();
 </script>
-
-</body>
-</html>
+\n</body>\n</html>\n
