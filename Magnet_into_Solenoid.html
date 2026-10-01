@@ -66,7 +66,7 @@ ol.steps .ans{font-family:var(--mono);font-weight:700}
 <div class="wrap">
   <header>
     <h1>Magnet moving into a solenoid</h1>
-    <p>Press Play, or drag the magnet. Fill in the table from what you see.</p>
+    <p>Press Play, then Pause at any moment to freeze the picture and take notes.</p>
   </header>
 
   <div class="grid">
@@ -128,15 +128,21 @@ ol.steps .ans{font-family:var(--mono);font-weight:700}
   const coil={x1:440,x2:720,cy:220,r:46,turns:8};        // A at x1 (left), B at x2 (right)
   const magW=170, magH=52;
   const xMin=60, xMax=coil.x1+150;                       // magnet right-face limits
-  const st={pole:'N', xr:200, v:0, auto:0, play:null, speed:3, slow:false, drag:null, lastT:0, needle:0, I:0, phase:0, reveal:true, hand:true};
+  const st={pole:'N', xr:200, v:0, auto:0, play:null, paused:false, speed:3, slow:false, drag:null, lastT:0, needle:0, I:0, phase:0, reveal:true, hand:true};
 
   // Controls
   function setPole(p){st.pole=p;$('poleN').setAttribute('aria-pressed',p==='N');$('poleS').setAttribute('aria-pressed',p==='S');}
   $('poleN').onclick=()=>setPole('N'); $('poleS').onclick=()=>setPole('S');
-  $('pushIn').onclick=()=>{st.play=null;st.auto=1;st.drag=null;};
-  $('pullOut').onclick=()=>{st.play=null;st.auto=-1;st.drag=null;};
-  $('hold').onclick=()=>{st.play=null;st.auto=0;st.v=0;};
-  $('play').onclick=()=>{st.drag=null;st.play={stage:'in',wait:0};st.auto=1;};
+  const playBtn=$('play');
+  function setPaused(p){st.paused=p;playBtn.textContent=p?'▶ Resume':(st.auto||st.play?'❚❚ Pause':'▶ Play');playBtn.classList.toggle('primary',!p);}
+  $('pushIn').onclick=()=>{st.play=null;st.auto=1;st.drag=null;setPaused(false);};
+  $('pullOut').onclick=()=>{st.play=null;st.auto=-1;st.drag=null;setPaused(false);};
+  $('hold').onclick=()=>{st.play=null;st.auto=0;st.v=0;setPaused(false);};
+  playBtn.onclick=()=>{
+    if(st.paused){setPaused(false);return;}                       // resume
+    if(st.auto||st.play){setPaused(true);return;}                 // freeze the frame, keep everything on screen
+    st.drag=null;st.play={stage:'in',wait:0};st.auto=1;setPaused(false);
+  };
   const names=['','very slow','slow','medium','fast','very fast'];
   $('speed').oninput=e=>{st.speed=+e.target.value;$('speedOut').textContent=names[st.speed];};
   $('slowmo').onchange=e=>st.slow=e.target.checked;
@@ -144,7 +150,7 @@ ol.steps .ans{font-family:var(--mono);font-weight:700}
   $('showHand').onchange=e=>st.hand=e.target.checked;
 
   function canvasX(e){const r=cv.getBoundingClientRect();return (e.clientX-r.left)*W/r.width;}
-  cv.addEventListener('pointerdown',e=>{cv.setPointerCapture(e.pointerId);st.auto=0;st.play=null;st.drag={x:canvasX(e),t:performance.now(),vs:[]};});
+  cv.addEventListener('pointerdown',e=>{cv.setPointerCapture(e.pointerId);st.auto=0;st.play=null;setPaused(false);st.drag={x:canvasX(e),t:performance.now(),vs:[]};});
   cv.addEventListener('pointermove',e=>{
     if(!st.drag)return;
     const x=canvasX(e),t=performance.now(),dt=Math.max(1,t-st.drag.t)/1000,dx=x-st.drag.x;
@@ -158,6 +164,7 @@ ol.steps .ans{font-family:var(--mono);font-weight:700}
 
   // Physics: flux through the coil changes most as the magnet's leading face passes end A
   function step(dt){
+    if(st.paused)return;                                   // frozen: nothing moves, readout stays
     const ts=st.slow?0.25:1;
     if(st.play&&st.auto===0){                              // paused between stages
       st.play.wait-=dt;st.v=0;
@@ -168,7 +175,7 @@ ol.steps .ans{font-family:var(--mono);font-weight:700}
       st.xr+=st.auto*pxs*dt*ts;
       let hit=false;
       if(st.xr>=xMax){st.xr=xMax;hit=true;} else if(st.xr<=xMin){st.xr=xMin;hit=true;}
-      if(hit){st.auto=0;st.v=0;if(st.play)st.play.wait=1.2;}
+      if(hit){st.auto=0;st.v=0;if(st.play)st.play.wait=1.2;else playBtn.textContent='▶ Play';}
       else st.v=st.auto*pxs;
     } else if(st.drag && performance.now()-st.drag.t>120) st.v=0;
     const g=Math.exp(-Math.pow((st.xr-coil.x1)/70,2));
@@ -371,8 +378,9 @@ ol.steps .ans{font-family:var(--mono);font-weight:700}
     ctx.strokeStyle=north;ctx.lineWidth=2.5;ctx.beginPath();ctx.moveTo(mcx,mcy);ctx.lineTo(mcx+Math.cos(na)*(R-4),mcy+Math.sin(na)*(R-4));ctx.stroke();
     ctx.fillStyle=meterC;ctx.beginPath();ctx.arc(mcx,mcy,4,0,Math.PI*2);ctx.fill();
 
-    if(!s.moving){ctx.fillStyle=muted;ctx.font='14px "Source Sans 3",system-ui,sans-serif';ctx.textAlign='left';ctx.textBaseline='alphabetic';
-      ctx.fillText('No movement → no field lines cut → no current, no poles, no force.',20,H-14);}
+    ctx.textAlign='left';ctx.textBaseline='alphabetic';ctx.font='14px "Source Sans 3",system-ui,sans-serif';
+    if(st.paused){ctx.fillStyle=accent;ctx.font='700 16px "Source Sans 3",system-ui,sans-serif';ctx.fillText('PAUSED — take your notes, then press Resume',20,26);}
+    else if(!s.moving){ctx.fillStyle=muted;ctx.fillText('No movement → no field lines cut → no current, no poles, no force.',20,26);}
   }
 
   function frame(t){
