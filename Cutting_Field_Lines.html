@@ -1,0 +1,325 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Cutting Field Lines</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700&family=JetBrains+Mono:wght@500&display=swap">
+<style>
+/* Layout: lab bench on the left (canvas), controls panel on the right; stacks at phone width */
+:root{
+  --bg:#f3f1ec; --panel:#ffffff; --fg:#1e2a3a; --muted:#5b6778; --line:#d6d2c8;
+  --accent:#8b2252; --north:#c9342b; --south:#3a6fc4; --field:#2f6fe0; --meter:#2a2a2a;
+  --wire:#b8862b; --good:#1f7a4d;
+  --display:"Source Sans 3",system-ui,sans-serif; --mono:"JetBrains Mono",ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --bg:#171a20; --panel:#20242c; --fg:#e7e9ee; --muted:#9aa4b5; --line:#343a45;
+  --accent:#e07aa6; --north:#e0564d; --south:#6b9cf0; --field:#7fb0ff; --meter:#eef0f4; --wire:#e0b050; --good:#5ec48d; color-scheme:dark } }
+:root[data-theme="dark"]{
+  --bg:#171a20; --panel:#20242c; --fg:#e7e9ee; --muted:#9aa4b5; --line:#343a45;
+  --accent:#e07aa6; --north:#e0564d; --south:#6b9cf0; --field:#7fb0ff; --meter:#eef0f4; --wire:#e0b050; --good:#5ec48d; color-scheme:dark }
+
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--display);font-size:16px;line-height:1.45}
+.wrap{max-width:1100px;margin:0 auto;padding-block:20px 32px;padding-inline:16px}
+header{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 18px;margin-bottom:14px}
+h1{font-size:1.7rem;margin:0;font-weight:700;letter-spacing:-.01em;text-wrap:balance}
+header p{margin:0;color:var(--muted)}
+.grid{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(260px,1fr);gap:16px}
+@media (max-width:760px){.grid{grid-template-columns:1fr}}
+.bench{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:10px;min-width:0}
+canvas{display:block;width:100%;height:auto;max-width:100%;touch-action:none;cursor:ns-resize}
+.panel{display:flex;flex-direction:column;gap:14px;min-width:0}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px 16px}
+.card h2{font-size:.78rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin:0 0 10px;font-weight:600}
+.seg{display:flex;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.seg button{flex:1;padding:8px 6px;border:0;background:transparent;color:var(--fg);font:inherit;font-weight:600;cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--accent);color:#fff}
+.seg button:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.row{display:grid;grid-template-columns:1fr auto;gap:4px 10px;align-items:center;margin-top:10px}
+.row:first-of-type{margin-top:0}
+.row label{font-weight:600}
+.row output{font-family:var(--mono);font-size:.9rem;color:var(--muted);font-variant-numeric:tabular-nums}
+.row input[type=range]{grid-column:1/-1;width:100%;accent-color:var(--accent)}
+.hint{font-size:.85rem;color:var(--muted);margin:4px 0 0}
+.check{display:flex;align-items:center;gap:8px;margin-top:10px;font-weight:600;font-size:.95rem}
+.check input{accent-color:var(--accent);width:18px;height:18px;flex:none}
+.emf{display:flex;align-items:baseline;gap:8px}
+.emf .v{font-family:var(--mono);font-size:2rem;font-weight:500;font-variant-numeric:tabular-nums;color:var(--accent);min-width:7ch}
+.emf .u{color:var(--muted)}
+.status{margin:8px 0 0;font-size:.95rem;min-height:2.6em}
+.btns{display:flex;gap:8px;margin-top:10px}
+.btns button{flex:1;padding:9px;border-radius:8px;border:1px solid var(--line);background:transparent;color:var(--fg);font:inherit;font-weight:600;cursor:pointer}
+.btns button.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+ul.rules{margin:0;padding-left:18px}
+ul.rules li{margin:4px 0}
+ul.rules b{color:var(--accent)}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header>
+    <h1>Generating electricity by cutting field lines</h1>
+    <p>Drag the wire up and down through the gap, or press Sweep.</p>
+  </header>
+
+  <div class="grid">
+    <div class="bench">
+      <canvas id="c" width="760" height="520" aria-label="Horseshoe magnet with a wire in its gap connected to a centre-zero meter"></canvas>
+    </div>
+
+    <div class="panel">
+      <div class="card">
+        <h2>Induced EMF</h2>
+        <div class="emf"><span class="v" id="emfVal">0.00</span><span class="u">mV</span></div>
+        <p class="status" id="status">Wire at rest: no field lines being cut, so no EMF is induced.</p>
+        <div class="btns">
+          <button class="primary" id="sweep" type="button">Sweep</button>
+          <button id="stop" type="button">Stop</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>What is moving?</h2>
+        <div class="seg" role="group" aria-label="What is moving">
+          <button id="modeWire" type="button" aria-pressed="true">The wire</button>
+          <button id="modeMag" type="button" aria-pressed="false">The magnet</button>
+        </div>
+        <p class="hint">Same speed, same EMF. Only the relative motion matters.</p>
+        <label class="check"><input type="checkbox" id="slowmo"> Slow motion (¼ speed, each field line flashes as it is cut)</label>
+      </div>
+
+      <div class="card">
+        <h2>To increase the EMF</h2>
+        <div class="row">
+          <label for="speed">Speed of movement</label><output id="speedOut">2.0 cm/s</output>
+          <input type="range" id="speed" min="0" max="5" step="0.1" value="2">
+        </div>
+        <div class="row">
+          <label for="bfield">Magnet strength</label><output id="bOut">1.0 T</output>
+          <input type="range" id="bfield" min="0.2" max="2" step="0.1" value="1">
+        </div>
+        <div class="row">
+          <label for="turns">Number of turns on the coil</label><output id="nOut">1 turn</output>
+          <input type="range" id="turns" min="1" max="20" step="1" value="1">
+        </div>
+        <p class="hint">EMF = N × B × L × v, with the wire length L in the field fixed at 5 cm.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  const cv=document.getElementById('c'), ctx=cv.getContext('2d');
+  const W=cv.width, H=cv.height;
+  const css=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+
+  // Geometry (canvas units)
+  const mag={x:260,y:70,w:300,h:210,gapX:360,gapW:100}; // poles at x..gapX and gapX+gapW..x+w
+  const gapTop=mag.y+16, gapBot=mag.y+mag.h-16;
+  const mid=(gapTop+gapBot)/2, amp=(gapBot-gapTop)/2-10;      // wire travel limits
+  const L=0.05; // metres in field
+
+  const st={mode:'wire', speed:2, B:1, N:1, running:false, pos:0, dir:1, v:0, magOff:0, drag:null, lastT:0, needle:0, slow:false, flash:[], prevRel:null, charge:0};
+
+  // Controls
+  const $=id=>document.getElementById(id);
+  const speedIn=$('speed'), bIn=$('bfield'), nIn=$('turns');
+  function syncOut(){
+    $('speedOut').textContent=st.speed.toFixed(1)+' cm/s';
+    $('bOut').textContent=st.B.toFixed(1)+' T';
+    $('nOut').textContent=st.N+(st.N===1?' turn':' turns');
+  }
+  speedIn.oninput=()=>{st.speed=+speedIn.value;syncOut();};
+  bIn.oninput=()=>{st.B=+bIn.value;syncOut();};
+  nIn.oninput=()=>{st.N=+nIn.value;syncOut();};
+  syncOut();
+  $('slowmo').onchange=e=>{st.slow=e.target.checked;};
+  $('sweep').onclick=()=>{st.running=true;st.drag=null;};
+  $('stop').onclick=()=>{st.running=false;st.v=0;};
+  function setMode(m){st.mode=m;$('modeWire').setAttribute('aria-pressed',m==='wire');$('modeMag').setAttribute('aria-pressed',m==='magnet');}
+  $('modeWire').onclick=()=>setMode('wire');
+  $('modeMag').onclick=()=>setMode('magnet');
+
+  // Dragging
+  function canvasY(e){const r=cv.getBoundingClientRect();return (e.clientY-r.top)*H/r.height;}
+  cv.addEventListener('pointerdown',e=>{cv.setPointerCapture(e.pointerId);st.running=false;st.drag={y:canvasY(e),t:performance.now(),vs:[]};});
+  cv.addEventListener('pointermove',e=>{
+    if(!st.drag)return;
+    const y=canvasY(e), t=performance.now(), dt=Math.max(1,t-st.drag.t)/1000;
+    const dy=y-st.drag.y;                                  // canvas px moved
+    // 1 cm = 25 px, so cm/s = px/s / 25.  Dragging up = positive motion.
+    const vcm=-(dy/dt)/25;
+    st.drag.vs.push(vcm); if(st.drag.vs.length>4)st.drag.vs.shift();
+    st.v=st.drag.vs.reduce((a,b)=>a+b,0)/st.drag.vs.length;
+    st.pos=Math.max(-1,Math.min(1,st.pos-dy/amp));
+    st.drag.y=y; st.drag.t=t;
+  });
+  const endDrag=()=>{st.drag=null;st.v=0;};
+  cv.addEventListener('pointerup',endDrag); cv.addEventListener('pointercancel',endDrag);
+
+  // Field-line heights (unshifted) — shared by physics and drawing
+  function lineYs(){const n=Math.round(3+st.B*4),a=[];for(let i=0;i<n;i++)a.push(gapTop+(gapBot-gapTop)*(i+0.5)/n);return a;}
+
+  // Physics step
+  function step(dt){
+    const ts=st.slow?0.25:1;
+    if(st.running){
+      const pxPerS=st.speed*25;               // 1 cm = 25 px
+      let d=st.dir*pxPerS*dt*ts/amp;
+      st.pos+=d;
+      if(st.pos>1){st.pos=1;st.dir=-1;} else if(st.pos<-1){st.pos=-1;st.dir=1;}
+      st.v=st.dir*st.speed;                   // wire (or magnet) speed, cm/s, up = +
+    } else if(st.drag){
+      // decay drag velocity if finger paused
+      if(performance.now()-st.drag.t>120) st.v=0;
+    }
+    // Relative velocity of wire through field: moving the magnet up = wire moving down relative to field
+    const vRel=(st.mode==='wire'?1:-1)*st.v;  // cm/s
+    const emf=st.N*st.B*L*(vRel/100);          // volts
+    const mV=emf*1000;
+    const target=Math.max(-1,Math.min(1,mV/10));
+    st.needle+=(target-st.needle)*Math.min(1,dt*14);
+
+    // Detect which field lines the wire has just cut (relative position wire − field)
+    const rel=st.pos*amp*(st.mode==='wire'?1:-1); // wire position relative to the field lines, in both modes
+    if(st.prevRel!==null){
+      lineYs().forEach((ly,i)=>{
+        const a=(mid-st.prevRel)-ly, b=(mid-rel)-ly;
+        if((a<0&&b>=0)||(a>0&&b<=0)) st.flash[i]=1;
+      });
+    }
+    st.prevRel=rel;
+    st.flash=st.flash.map(f=>Math.max(0,f-dt*(st.slow?1.2:4)));
+    st.charge+=mV*dt*ts*3;                       // charges drift round the loop with the current
+    return mV;
+  }
+
+  function updateText(mV){
+    $('emfVal').textContent=(mV>=0?'+':'−')+Math.abs(mV).toFixed(2);
+    const s=$('status');
+    if(Math.abs(st.v)<0.05){
+      s.textContent=(st.mode==='wire'?'Wire':'Magnet')+' at rest: no field lines being cut, so no EMF is induced.';
+    } else {
+      const who=st.mode==='wire'?'The wire is cutting the field lines':'The field lines are sweeping across the wire';
+      s.textContent=who+' → an EMF of '+Math.abs(mV).toFixed(2)+' mV is induced. Reversing the direction reverses the EMF.';
+    }
+  }
+
+  // Drawing helpers
+  function arrow(x1,y1,x2,y2,col){
+    ctx.strokeStyle=col;ctx.fillStyle=col;ctx.lineWidth=1.6;
+    ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);ctx.stroke();
+    const a=Math.atan2(y2-y1,x2-x1), m=(x1+x2)/2, n=(y1+y2)/2;
+    ctx.beginPath();ctx.moveTo(m+6*Math.cos(a),n+6*Math.sin(a));
+    ctx.lineTo(m-5*Math.cos(a)+4*Math.sin(a),n-5*Math.sin(a)-4*Math.cos(a));
+    ctx.lineTo(m-5*Math.cos(a)-4*Math.sin(a),n-5*Math.sin(a)+4*Math.cos(a));ctx.closePath();ctx.fill();
+  }
+  function roundRect(x,y,w,h,r){ctx.beginPath();ctx.roundRect(x,y,w,h,r);}
+
+  function draw(mV){
+    const fg=css('--fg'),muted=css('--muted'),line=css('--line'),north=css('--north'),south=css('--south'),
+          field=css('--field'),meterC=css('--meter'),wireC=css('--wire'),accent=css('--accent'),panel=css('--panel');
+    ctx.clearRect(0,0,W,H);
+    ctx.font='600 15px "Source Sans 3",system-ui,sans-serif';
+
+    const magOff=st.mode==='magnet'?-st.pos*amp:0;         // magnet vertical shift
+    const wireY=st.mode==='wire'?mid-st.pos*amp:mid;
+
+    // Magnet poles
+    ctx.save();ctx.translate(0,magOff);
+    ctx.fillStyle=north;roundRect(mag.x,mag.y,mag.gapX-mag.x,mag.h,6);ctx.fill();
+    ctx.fillStyle=south;roundRect(mag.gapX+mag.gapW,mag.y,mag.x+mag.w-mag.gapX-mag.gapW,mag.h,6);ctx.fill();
+    // Horseshoe back
+    ctx.fillStyle=line;ctx.fillRect(mag.x,mag.y+mag.h,mag.w,26);
+    ctx.fillStyle='#fff';ctx.font='700 34px "Source Sans 3",system-ui,sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.fillText('N',(mag.x+mag.gapX)/2,mag.y+mag.h/2);
+    ctx.fillText('S',mag.gapX+mag.gapW+(mag.x+mag.w-mag.gapX-mag.gapW)/2,mag.y+mag.h/2);
+    // Field lines N → S, density by B; a line flashes when the wire cuts it
+    const lys=lineYs();
+    lys.forEach((y,i)=>{
+      const f=st.flash[i]||0;
+      ctx.globalAlpha=0.9;
+      arrow(mag.gapX+4,y,mag.gapX+mag.gapW-4,y,field);
+      if(f>0){ctx.globalAlpha=f;ctx.strokeStyle=accent;ctx.lineWidth=6;ctx.lineCap='round';ctx.beginPath();ctx.moveTo(mag.gapX+4,y);ctx.lineTo(mag.gapX+mag.gapW-4,y);ctx.stroke();}
+    });
+    ctx.globalAlpha=1;
+    ctx.restore();
+    if(st.flash.some(f=>f>0.5)){ctx.fillStyle=accent;ctx.font='700 15px "Source Sans 3",system-ui,sans-serif';ctx.textAlign='left';ctx.textBaseline='middle';ctx.fillText('field line cut!',mag.x+mag.w+14,mid+magOff);}
+
+    // Circuit: loop from wire ends down to meter
+    const meter={x:300,y:380,w:160,h:100};
+    const lx=mag.gapX-30, rx=mag.gapX+mag.gapW+30;
+    ctx.strokeStyle=wireC;ctx.lineWidth=3;ctx.lineCap='round';
+    // N turns drawn as a bundle (visual cap of 6 strands)
+    const strands=Math.min(st.N,6), spread=(strands-1)*3;
+    for(let k=0;k<strands;k++){
+      const yy=wireY-spread/2+k*3;
+      ctx.beginPath();ctx.moveTo(lx,yy);ctx.lineTo(rx,yy);ctx.stroke();
+    }
+    ctx.beginPath();
+    ctx.moveTo(lx,wireY);ctx.lineTo(lx-60,wireY);ctx.lineTo(lx-60,meter.y+meter.h/2);ctx.lineTo(meter.x,meter.y+meter.h/2);
+    ctx.moveTo(rx,wireY);ctx.lineTo(rx+60,wireY);ctx.lineTo(rx+60,meter.y+meter.h/2);ctx.lineTo(meter.x+meter.w,meter.y+meter.h/2);
+    ctx.stroke();
+    if(st.N>1){ctx.fillStyle=fg;ctx.font='600 13px "Source Sans 3",system-ui,sans-serif';ctx.textAlign='left';ctx.textBaseline='alphabetic';ctx.fillText(st.N+' turns',rx+8,wireY-12);}
+
+    // Moving charges show the induced current round the circuit (drawn before the meter, so they pass behind it)
+    if(Math.abs(mV)>0.05){
+      const my=meter.y+meter.h/2;
+      const pts=[[lx,wireY],[lx-60,wireY],[lx-60,my],[meter.x+meter.w,my],[rx+60,my],[rx+60,wireY],[rx,wireY],[lx,wireY]];
+      const segs=[];let total=0;
+      for(let i=0;i<pts.length-1;i++){const d=Math.hypot(pts[i+1][0]-pts[i][0],pts[i+1][1]-pts[i][1]);segs.push(d);total+=d;}
+      const n=14;
+      ctx.fillStyle=css('--good');
+      for(let k=0;k<n;k++){
+        let s=((st.charge+k*total/n)%total+total)%total;
+        let i=0;while(s>segs[i]){s-=segs[i];i++;}
+        const t=s/segs[i],x=pts[i][0]+(pts[i+1][0]-pts[i][0])*t,y=pts[i][1]+(pts[i+1][1]-pts[i][1])*t;
+        if(x>meter.x&&x<meter.x+meter.w&&Math.abs(y-my)<2)continue;
+        ctx.beginPath();ctx.arc(x,y,4,0,Math.PI*2);ctx.fill();
+      }
+    }
+
+    // Motion arrow on whichever thing moves
+    if(Math.abs(st.v)>0.05){
+      const up=(st.v>0);
+      const ax=st.mode==='wire'?lx-20:mag.x-30, ay=st.mode==='wire'?wireY:mag.y+magOff+mag.h/2;
+      ctx.lineWidth=5;ctx.strokeStyle=accent;ctx.fillStyle=accent;
+      ctx.beginPath();ctx.moveTo(ax,ay+(up?22:-22));ctx.lineTo(ax,ay-(up?22:-22));ctx.stroke();
+      ctx.beginPath();ctx.moveTo(ax,ay-(up?34:-34));ctx.lineTo(ax-10,ay-(up?18:-18));ctx.lineTo(ax+10,ay-(up?18:-18));ctx.closePath();ctx.fill();
+    }
+
+    // Meter
+    ctx.fillStyle=panel;ctx.strokeStyle=meterC;ctx.lineWidth=2;roundRect(meter.x,meter.y,meter.w,meter.h,10);ctx.fill();ctx.stroke();
+    ctx.fillStyle=muted;ctx.font='600 12px "Source Sans 3",system-ui,sans-serif';ctx.textAlign='center';
+    ctx.fillText('EMF (mV)',meter.x+meter.w/2,meter.y+16);
+    const cx=meter.x+meter.w/2, cy=meter.y+meter.h-12, R=66;
+    ctx.strokeStyle=line;ctx.lineWidth=1.5;ctx.beginPath();ctx.arc(cx,cy,R,Math.PI*1.2,Math.PI*1.8);ctx.stroke();
+    ctx.fillStyle=fg;ctx.font='600 11px "JetBrains Mono",monospace';
+    [['−10',1.2],['0',1.5],['+10',1.8]].forEach(([t,f])=>{const a=Math.PI*f;ctx.fillText(t,cx+Math.cos(a)*(R+10),cy+Math.sin(a)*(R+10)+4);});
+    for(let i=-10;i<=10;i++){const a=Math.PI*(1.5+0.3*i/10);const r0=i%5===0?R-9:R-5;ctx.strokeStyle=fg;ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(cx+Math.cos(a)*r0,cy+Math.sin(a)*r0);ctx.lineTo(cx+Math.cos(a)*R,cy+Math.sin(a)*R);ctx.stroke();}
+    const na=Math.PI*(1.5+0.3*st.needle);
+    ctx.strokeStyle=north;ctx.lineWidth=2.5;ctx.beginPath();ctx.moveTo(cx,cy);ctx.lineTo(cx+Math.cos(na)*(R-4),cy+Math.sin(na)*(R-4));ctx.stroke();
+    ctx.fillStyle=meterC;ctx.beginPath();ctx.arc(cx,cy,4,0,Math.PI*2);ctx.fill();
+
+    // Caption
+    ctx.fillStyle=muted;ctx.font='14px "Source Sans 3",system-ui,sans-serif';ctx.textAlign='left';
+    ctx.fillText('Drag the wire (or the magnet) up and down through the gap.',20,H-20);
+  }
+
+  function frame(t){
+    const dt=Math.min(0.05,(t-(st.lastT||t))/1000);st.lastT=t;
+    const mV=step(dt);
+    draw(mV);updateText(mV);
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+})();
+</script>
+
+</body>
+</html>
