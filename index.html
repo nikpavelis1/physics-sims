@@ -16,6 +16,11 @@ a.card:hover,a.card:focus-visible{border-color:var(--accent);outline:none}
 a.card b{display:block;font-size:1.15rem;color:var(--accent);margin-bottom:4px}
 a.card span{color:var(--muted);font-size:.95rem}
 footer{margin-top:30px;color:var(--muted);font-size:.85rem}
+#qrbtn{display:inline-block;margin-top:18px;padding:10px 16px;border:1px solid var(--line);border-radius:8px;background:var(--panel);color:var(--fg);font:inherit;font-weight:600;cursor:pointer}
+#qrbox{display:none;text-align:center;margin-top:24px;padding:28px 16px;background:#fff;border-radius:12px}
+#qrbox.show{display:block}
+#qr{display:inline-block}
+#qrbox p{margin:14px 0 0;color:#333;font-family:ui-monospace,Menlo,monospace;font-size:1.3rem;word-break:break-all}
 </style>
 </head>
 <body>
@@ -24,7 +29,16 @@ footer{margin-top:30px;color:var(--muted);font-size:.85rem}
   <p class="sub">Putney High School Physics · GCSE Electromagnetism</p>
   <a class="card" href="Magnet_into_Solenoid.html"><b>Magnet into a solenoid</b><span>Push a magnet into a coil. Find the induced poles, the force, and the current direction at end A.</span></a>
   <a class="card" href="Cutting_Field_Lines.html"><b>Cutting field lines</b><span>Pull a wire through a magnetic field. Change speed, magnet strength and turns, and watch the EMF.</span></a>
+  <button id="qrbtn" type="button">Show QR code for the board</button>
+  <div id="qrbox"><div id="qr"></div><p>nikpavelis1.github.io/physics-sims</p></div>
   <footer>Tip: in Safari, tap Share → Add to Home Screen to keep a simulation on your iPad.</footer>
 </div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script>
+(function(){var b=document.getElementById('qrbtn'),box=document.getElementById('qrbox'),made=false;
+b.addEventListener('click',function(){box.classList.toggle('show');
+ if(!made){new QRCode(document.getElementById('qr'),{text:'https://nikpavelis1.github.io/physics-sims/',width:420,height:420,correctLevel:QRCode.CorrectLevel.M});made=true;}
+ b.textContent=box.classList.contains('show')?'Hide QR code':'Show QR code for the board';});})();
+</script>
 </body>
 </html>
