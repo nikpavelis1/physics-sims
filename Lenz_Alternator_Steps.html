@@ -40,7 +40,7 @@
   .stage{position:relative;border-radius:10px;overflow:hidden;background:#fbfbfd;border:1px solid var(--line)}
   #three{display:block;width:100%;touch-action:none;cursor:grab}
   .labels{position:absolute;inset:0;pointer-events:none}
-  .lab{position:absolute;transform:translate(-50%,-50%);font-size:13.5px;white-space:nowrap;color:#222;background:rgba(255,255,255,.82);padding:1px 6px;border-radius:5px}
+  .lab{position:absolute;transform:translate(-50%,-50%);font-size:12.5px;white-space:nowrap;color:#222;background:rgba(255,255,255,.82);padding:1px 6px;border-radius:5px}
   .lab.big{font-size:24px;font-weight:700;background:none}
   .lab.temp{color:var(--temp);font-weight:700}
   .lab.push{color:var(--push);font-weight:700}
@@ -229,8 +229,8 @@ function build3D(){
   const scene=new THREE.Scene(), camera=new THREE.PerspectiveCamera(34,1.5,0.1,100);
   scene.add(new THREE.AmbientLight(0xffffff,0.65));
   const dl=new THREE.DirectionalLight(0xffffff,0.6); dl.position.set(4,8,6); scene.add(dl);
-  const cam={az:0.55,el:0.38,dist:15.5};
-  $('vFig').onclick=()=>{cam.az=0.55;cam.el=0.38;cam.dist=15.5;};
+  const cam={az:0.55,el:0.38,dist:11.5};
+  $('vFig').onclick=()=>{cam.az=0.55;cam.el=0.38;cam.dist=11.5;};
   const pts=new Map();
   canvas.addEventListener('pointerdown',e=>{canvas.setPointerCapture(e.pointerId);pts.set(e.pointerId,{x:e.clientX,y:e.clientY});});
   canvas.addEventListener('pointermove',e=>{ if(!pts.has(e.pointerId))return; const p=pts.get(e.pointerId);
@@ -331,7 +331,7 @@ function build3D(){
   const lCut=lab('field line being cut!','',()=>V(0,1.25,0.7)); lCut.el.style.color='#b37800'; lCut.el.style.fontWeight='700';
   let cutShow=0;
 
-  function resize(){ const w=stage.clientWidth,h=Math.round(w*0.66); renderer.setSize(w,h,false); canvas.style.height=h+'px'; camera.aspect=w/h; camera.updateProjectionMatrix(); }
+  function resize(){ const w=stage.clientWidth,h=Math.round(w*0.78); renderer.setSize(w,h,false); canvas.style.height=h+'px'; camera.aspect=w/h; camera.updateProjectionMatrix(); }
   window.addEventListener('resize',resize); resize();
 
   let prevY=[side(1).y, side(-1).y];
@@ -380,7 +380,7 @@ function build3D(){
     lOut.el.innerHTML = S.connected ? 'To transformer and lamp' : 'Switch OPEN: circuit broken' + (F.volt?' (voltmeter only)':'');
     lOut.el.style.color = S.connected ? '#222' : '#9b1f1f';
     camera.position.set(cam.dist*Math.cos(cam.el)*Math.sin(cam.az),cam.dist*Math.sin(cam.el),cam.dist*Math.cos(cam.el)*Math.cos(cam.az));
-    camera.lookAt(0,0,-0.2); renderer.render(scene,camera);
+    camera.lookAt(0,-0.25,0); renderer.render(scene,camera);
     const W=canvas.clientWidth,H=canvas.clientHeight;
     for (const l of labs){ if(l.el.style.display==='none')continue; const p=l.f().project(camera);
       l.el.style.visibility=p.z>1?'hidden':'visible'; l.el.style.left=((p.x+1)/2*W)+'px'; l.el.style.top=((1-p.y)/2*H)+'px'; }
