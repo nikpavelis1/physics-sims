@@ -1,44 +1,78 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Putney Physics Simulations</title>
 <style>
-:root{--bg:#f3f1ec;--panel:#fff;--fg:#1e2a3a;--muted:#5b6778;--line:#d6d2c8;--accent:#8b2252}
-@media (prefers-color-scheme:dark){:root{--bg:#171a20;--panel:#20242c;--fg:#e7e9ee;--muted:#9aa4b5;--line:#343a45;--accent:#e07aa6}}
-body{margin:0;background:var(--bg);color:var(--fg);font-family:system-ui,sans-serif;line-height:1.45}
-.wrap{max-width:720px;margin:0 auto;padding:40px 16px}
-h1{font-size:1.8rem;margin:0 0 6px}
-p.sub{color:var(--muted);margin:0 0 28px}
-a.card{display:block;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:18px 20px;margin-bottom:14px;color:inherit;text-decoration:none}
-a.card:hover,a.card:focus-visible{border-color:var(--accent);outline:none}
-a.card b{display:block;font-size:1.15rem;color:var(--accent);margin-bottom:4px}
-a.card span{color:var(--muted);font-size:.95rem}
-footer{margin-top:30px;color:var(--muted);font-size:.85rem}
-#qrbtn{display:inline-block;margin-top:18px;padding:10px 16px;border:1px solid var(--line);border-radius:8px;background:var(--panel);color:var(--fg);font:inherit;font-weight:600;cursor:pointer}
-#qrbox{display:none;text-align:center;margin-top:24px;padding:28px 16px;background:#fff;border-radius:12px}
-#qrbox.show{display:block}
-#qr{display:inline-block}
-#qrbox p{margin:14px 0 0;color:#333;font-family:ui-monospace,Menlo,monospace;font-size:1.3rem;word-break:break-all}
+  :root{--bg:#f4f6fb;--card:#fff;--ink:#1d2433;--muted:#5f6b7f;--line:#dde2ec;--accent:#2f6fde}
+  *{box-sizing:border-box}
+  body{margin:0;font-family:Arial,Helvetica,sans-serif;background:var(--bg);color:var(--ink)}
+  header{background:linear-gradient(135deg,#1d2433,#2f4f8f);color:#fff;padding:28px 22px 24px}
+  header h1{margin:0 0 6px;font-size:28px}
+  header p{margin:0;opacity:.85;font-size:15px}
+  main{max-width:1100px;margin:0 auto;padding:20px 18px 40px}
+  .search{width:100%;padding:12px 14px;font-size:16px;border:1px solid var(--line);border-radius:10px;margin-bottom:18px}
+  h2{font-size:15px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin:22px 0 10px}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:8px}
+  .icon{font-size:30px}
+  .card h3{margin:0;font-size:18px}
+  .card p{margin:0;font-size:14px;color:var(--muted);line-height:1.4;flex:1}
+  .tags{display:flex;gap:6px;flex-wrap:wrap}
+  .tag{font-size:12px;background:#eef2fb;color:#2f4f8f;border-radius:20px;padding:3px 9px}
+  .open{display:block;text-align:center;background:var(--accent);color:#fff;text-decoration:none;font-weight:700;font-size:16px;padding:12px;border-radius:10px;margin-top:4px}
+  .open:active{transform:scale(.98)}
+  .none{display:none;color:var(--muted);font-size:15px}
+  footer{text-align:center;color:var(--muted);font-size:13px;padding:10px 0 30px}
 </style>
 </head>
 <body>
-<div class="wrap">
-  <h1>Physics simulations</h1>
-  <p class="sub">Putney High School Physics · GCSE Electromagnetism</p>
-  <a class="card" href="Magnet_into_Solenoid.html"><b>Magnet into a solenoid</b><span>Push a magnet into a coil. Find the induced poles, the force, and the current direction at end A.</span></a>
-  <a class="card" href="Cutting_Field_Lines.html"><b>Cutting field lines</b><span>Pull a wire through a magnetic field. Change speed, magnet strength and turns, and watch the EMF.</span></a>
-  <button id="qrbtn" type="button">Show QR code for the board</button>
-  <div id="qrbox"><div id="qr"></div><p>nikpavelis1.github.io/physics-sims</p></div>
-  <footer>Tip: in Safari, tap Share → Add to Home Screen to keep a simulation on your iPad.</footer>
-</div>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<header>
+  <h1>⚛️ Putney Physics Simulations</h1>
+  <p>Tap a button to open a simulation.</p>
+</header>
+<main>
+  <input class="search" id="search" type="search" placeholder="Search simulations (e.g. transformer, induction)">
+  <div id="list"></div>
+  <p class="none" id="none">No simulations match your search.</p>
+</main>
+<footer>Mr Pavelis · Putney High School Physics</footer>
+
 <script>
-(function(){var b=document.getElementById('qrbtn'),box=document.getElementById('qrbox'),made=false;
-b.addEventListener('click',function(){box.classList.toggle('show');
- if(!made){new QRCode(document.getElementById('qr'),{text:'https://nikpavelis1.github.io/physics-sims/',width:420,height:420,correctLevel:QRCode.CorrectLevel.M});made=true;}
- b.textContent=box.classList.contains('show')?'Hide QR code':'Show QR code for the board';});})();
+// ===== To add a new simulation: upload its .html file to the repo, then add one line here. =====
+const SIMS = [
+  { topic:'Electromagnetic induction', icon:'🧲', title:'Magnet into a Solenoid',
+    file:'Magnet_into_Solenoid.html', level:'GCSE',
+    desc:'Push a magnet in and out of a coil and see when a pd is induced and which way the current flows.' },
+  { topic:'Electromagnetic induction', icon:'✂️', title:'Cutting Field Lines',
+    file:'Cutting_Field_Lines.html', level:'GCSE',
+    desc:'Move a wire through a magnetic field and see how cutting field lines induces a potential difference.' },
+  { topic:'Electromagnetic induction', icon:'🔄', title:'Why Does the Alternator Slow Down?',
+    file:'Lenz_Alternator_Steps.html', level:'GCSE',
+    desc:'Step by step: the coil cuts the field lines, a current flows, the temporary field pushes back. Lenz\'s law.' },
+  { topic:'Transformers', icon:'⚡', title:'Transformer Lab',
+    file:'Transformer_Lab.html', level:'GCSE',
+    desc:'Change the turns on each coil and watch the alternating field link the primary to the secondary.' },
+];
+
+const list=document.getElementById('list'), none=document.getElementById('none');
+function render(q=''){
+  q=q.trim().toLowerCase();
+  const shown=SIMS.filter(s=>!q || (s.title+' '+s.topic+' '+s.desc+' '+s.level).toLowerCase().includes(q));
+  const topics=[...new Set(shown.map(s=>s.topic))];
+  list.innerHTML=topics.map(t=>`<h2>${t}</h2><div class="grid">`+shown.filter(s=>s.topic===t).map(s=>`
+    <div class="card">
+      <div class="icon">${s.icon}</div>
+      <h3>${s.title}</h3>
+      <div class="tags"><span class="tag">${s.level}</span></div>
+      <p>${s.desc}</p>
+      <a class="open" href="${s.file}">Open simulation ▶</a>
+    </div>`).join('')+`</div>`).join('');
+  none.style.display=shown.length?'none':'block';
+}
+document.getElementById('search').addEventListener('input',e=>render(e.target.value));
+render();
 </script>
 </body>
 </html>
