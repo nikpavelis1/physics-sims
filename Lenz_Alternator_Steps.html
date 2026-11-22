@@ -6,39 +6,39 @@
 <title>Why Does the Alternator Slow Down? Step by Step (Q10.5)</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <style>
-  :root{--bg:#f6f7fb;--card:#fff;--ink:#1d2433;--muted:#5f6b7f;--line:#dde2ec;--perm:#4a6fa5;--temp:#8a3ffc;--push:#d63a3a;--move:#1f9d55;--cut:#f5a400;--cur:#e8820c}
+  :root{--bg:#f6f7fb;--card:#fff;--ink:#1d2433;--muted:#5f6b7f;--line:#dde2ec;--perm:#4a6fa5;--temp:#8a3ffc;--push:#d63a3a;--move:#1f9d55;--cut:#f5a400;--cur:#e8820c;--focus:#f5a400}
   *{box-sizing:border-box}
   html{color-scheme:light}
   button{color:#1d2433;font-family:inherit;-webkit-text-fill-color:currentColor}
-  .stepBtn,.stepBtn b,.seg button,button.small,.navBtn.ghost{color:#1d2433}
-  .seg button.active,.navBtn:not(.ghost){color:#fff}
   body{margin:0;font-family:Arial,Helvetica,sans-serif;background:var(--bg);color:var(--ink)}
-  header{padding:12px 18px 2px}
-  h1{font-size:20px;margin:0 0 4px}
-  .sub{color:var(--muted);font-size:14px;margin:0}
-  .wrap{padding:10px 18px 22px;display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);gap:14px}
-  @media (max-width:1000px){.wrap{grid-template-columns:1fr}}
-  .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px}
-  .card h2{font-size:13.5px;margin:0 0 8px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted)}
-  .full{grid-column:1/-1}
-  /* step selector */
-  .track{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:8px}
-  .trackName{width:190px;font-weight:800;font-size:15px}
+  .app{display:flex;flex-direction:column;gap:8px;padding:8px 10px}
+  @media (min-width:1000px){ .app{height:100vh;overflow:hidden} }
+  /* top bar */
+  .top{background:#fff;border:1px solid var(--line);border-radius:12px;padding:8px 10px}
+  .titleRow{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:6px}
+  .titleRow h1{font-size:17px;margin:0 auto 0 0}
+  .track{display:flex;align-items:stretch;gap:6px;margin-top:5px}
+  .trackName{width:120px;flex:none;font-weight:800;font-size:13.5px;display:flex;flex-direction:column;justify-content:center}
+  .trackName span{font-weight:400;font-size:11px}
   .trackName.on{color:#11683a} .trackName.off{color:#9b1f1f}
-  .stepBtn{flex:1 1 120px;border:2px solid var(--line);background:#fff;border-radius:10px;padding:8px 10px;font-size:13.5px;text-align:left;cursor:pointer;line-height:1.3;min-height:52px}
-  .stepBtn b{font-size:16px;margin-right:4px}
+  .stepBtn{flex:1 1 0;min-width:0;border:2px solid var(--line);background:#fff;border-radius:9px;padding:5px 8px;font-size:13px;text-align:left;cursor:pointer;line-height:1.25;color:#1d2433}
+  .stepBtn b{font-size:15px;margin-right:3px;color:#1d2433}
   .stepBtn.done{background:#f4f6fa}
   .stepBtn.cur.onT{border-color:#11683a;background:#e8f6ee;box-shadow:0 0 0 3px rgba(31,157,85,.2)}
   .stepBtn.cur.offT{border-color:#9b1f1f;background:#fdeeee;box-shadow:0 0 0 3px rgba(214,58,58,.2)}
-  .navRow{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-  .navBtn{border:1px solid var(--ink);background:var(--ink);color:#fff;border-radius:8px;padding:8px 14px;font-size:14px;cursor:pointer}
-  .navBtn.ghost{background:#fff;color:var(--ink)}
+  .navBtn{border:1px solid var(--ink);background:var(--ink);color:#fff;border-radius:8px;padding:6px 12px;font-size:13.5px;cursor:pointer}
+  .navBtn.ghost{background:#fff;color:#1d2433}
   .seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden}
-  .seg button{border:0;background:#fff;padding:7px 11px;font-size:13px;cursor:pointer}
+  .seg button{border:0;background:#fff;padding:6px 9px;font-size:12.5px;cursor:pointer;color:#1d2433}
   .seg button.active{background:var(--ink);color:#fff}
-  /* 3D stage */
-  .stage{position:relative;border-radius:10px;overflow:hidden;background:#fbfbfd;border:1px solid var(--line)}
-  #three{display:block;width:100%;touch-action:none;cursor:grab}
+  button.small{border:1px solid var(--line);background:#fff;border-radius:8px;padding:6px 9px;font-size:12.5px;cursor:pointer;color:#1d2433}
+  /* main area */
+  .main{display:grid;grid-template-columns:minmax(0,1.25fr) 200px minmax(0,1fr);gap:8px;flex:1;min-height:0}
+  @media (max-width:999px){ .main{grid-template-columns:1fr} }
+  .panel{background:#fff;border:1px solid var(--line);border-radius:12px;padding:8px;min-height:0}
+  .stage{position:relative;border-radius:10px;overflow:hidden;background:#fbfbfd;height:100%;min-height:320px}
+  @media (max-width:999px){ .stage{height:72vw} }
+  #three{display:block;width:100%;height:100%;touch-action:none;cursor:grab}
   .labels{position:absolute;inset:0;pointer-events:none}
   .lab{position:absolute;transform:translate(-50%,-50%);font-size:12.5px;white-space:nowrap;color:#222;background:rgba(255,255,255,.82);padding:1px 6px;border-radius:5px}
   .lab.big{font-size:24px;font-weight:700;background:none}
@@ -46,92 +46,111 @@
   .lab.push{color:var(--push);font-weight:700}
   .lab.move{color:var(--move);font-weight:700}
   .lab.hl{outline:3px solid var(--cut);font-weight:700}
-  .callout{background:#fff;border:2px solid var(--ink);border-radius:10px;padding:8px 11px;font-size:14.5px;line-height:1.35;margin-bottom:8px;min-height:64px}
-  .callout .t{font-weight:800;font-size:15px;margin-bottom:3px}
-  .dials{display:flex;gap:10px;align-items:center;margin-top:8px;flex-wrap:wrap}
-  .dialNote{font-size:12.5px;color:var(--muted);max-width:180px}
-  .dials canvas{width:170px;height:119px;background:rgba(255,255,255,.95);border:2px solid #333;border-radius:10px}
+  .callout{position:absolute;left:8px;top:8px;background:rgba(255,255,255,.95);border:2px solid var(--ink);border-radius:9px;padding:5px 10px;font-size:14px;font-weight:800;pointer-events:none;max-width:70%}
   .viewBtns{position:absolute;right:8px;top:8px}
-  button.small{border:1px solid var(--line);background:#fff;border-radius:8px;padding:6px 10px;font-size:13px;cursor:pointer}
-  .key{display:flex;flex-wrap:wrap;gap:12px;font-size:13px;margin-top:8px}
-  .key span{display:flex;align-items:center;gap:6px}
-  .key i{display:inline-block;width:22px;height:5px;border-radius:3px}
-  /* right panel */
-  .explain{font-size:15.5px;line-height:1.5}
-  .explain .title{font-size:19px;font-weight:800;margin-bottom:6px}
-  .explain .why{margin-top:8px;padding:9px 11px;background:#f7f2ff;border-left:5px solid var(--temp);border-radius:6px;font-size:14.5px}
-  .explain .tick{color:#11683a;font-weight:700}
-  .speedBox{display:flex;align-items:center;gap:14px;margin-top:10px}
-  .speedNum{font-size:30px;font-weight:800;font-variant-numeric:tabular-nums}
-  .speedLbl{font-size:12.5px;color:var(--muted)}
-  .lamp{width:42px;height:42px;border-radius:50%;border:3px solid #333;flex:none;margin-left:auto}
-  canvas.c2{width:100%;display:block;border-radius:8px;border:1px solid var(--line);background:#fff}
-  .switch{width:100%;font-size:17px;font-weight:800;padding:10px;border-radius:10px;border:3px solid;cursor:pointer;margin-top:10px;display:none}
+  .trend{position:absolute;left:50%;top:52px;transform:translateX(-50%);padding:7px 14px;border-radius:12px;font-weight:800;font-size:18px;pointer-events:none;text-align:center;border:3px solid;background:rgba(255,255,255,.95);white-space:nowrap;transition:all .3s}
+  .trend small{display:block;font-size:12.5px;font-weight:600}
+  .trend.up{color:#11683a;border-color:#1f9d55}
+  .trend.down{color:#9b1f1f;border-color:#d63a3a}
+  .trend.steady{color:#1d2433;border-color:#9aa4b5}
+  .diag{position:absolute;right:8px;bottom:8px;width:min(46%,340px);padding:3px;background:rgba(255,255,255,.97)}
+  .diag canvas{width:100%;display:block}
+  .key{position:absolute;left:8px;bottom:6px;display:flex;flex-wrap:wrap;gap:4px 10px;font-size:11.5px;background:rgba(255,255,255,.88);padding:4px 8px;border-radius:8px;pointer-events:none;max-width:calc(52% - 16px)}
+  .key span{display:flex;align-items:center;gap:4px}
+  .key i{display:inline-block;width:16px;height:4px;border-radius:2px}
+  /* instrument bubbles */
+  .instr{display:flex;flex-direction:column;gap:7px;overflow:auto;padding:0;background:none;border:0}
+  @media (max-width:999px){ .instr{flex-direction:row;flex-wrap:wrap} .instr .bubble{flex:1 1 180px} }
+  .bubble{background:#fff;border:2px solid var(--line);border-radius:14px;padding:7px 8px;transition:box-shadow .3s,border-color .3s}
+  .bubble h3{margin:0 0 3px;font-size:12px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted)}
+  .bubble.focus{border-color:var(--focus);box-shadow:0 0 0 4px rgba(245,164,0,.28);animation:pulse 1.4s ease-in-out infinite}
+  @keyframes pulse{50%{box-shadow:0 0 0 8px rgba(245,164,0,.12)}}
+  .bubble canvas{width:100%;display:block}
+  .circ{display:flex;align-items:center;gap:8px}
+  .circState{font-size:15px;font-weight:800;line-height:1.2}
+  .circState small{display:block;font-size:11px;font-weight:400;color:var(--muted)}
+  .lamp{width:34px;height:34px;border-radius:50%;border:3px solid #333;flex:none;margin-left:auto}
+  .switch{width:100%;font-size:13px;font-weight:800;padding:6px;border-radius:8px;border:2px solid;cursor:pointer;margin-top:6px;display:none}
   .switch.on{background:#e8f6ee;border-color:var(--move);color:#11683a}
   .switch.off{background:#fdeeee;border-color:var(--push);color:#9b1f1f}
-  .row{display:flex;align-items:center;gap:10px;font-size:13.5px;flex-wrap:wrap;margin-top:8px}
-  .row input[type=range]{flex:1;min-width:120px}
-  .rule{font-size:15px;padding:10px 14px;border:2px dashed var(--temp);border-radius:10px;background:#f7f2ff}
+  .speedNum{font-size:24px;font-weight:800;font-variant-numeric:tabular-nums}
+  .speedLbl{font-size:11px;color:var(--muted)}
+  .pushRow{font-size:11.5px;color:var(--muted)}
+  .pushRow input{width:100%}
+  /* right column */
+  .right{display:flex;flex-direction:column;gap:8px;overflow:auto}
+  .right>*{flex:none}
+  .explain{font-size:14.5px;line-height:1.45}
+  .explain .title{font-size:17px;font-weight:800;margin-bottom:5px}
+  .explain .look{background:#fff8e6;border-left:5px solid var(--focus);border-radius:6px;padding:6px 9px;margin-bottom:6px;font-size:14px}
+  .moreBtn{display:block;width:100%;text-align:left;border:2px solid #1d2433;background:#fff;color:#1d2433;border-radius:9px;padding:7px 10px;font-size:14px;font-weight:700;cursor:pointer;margin:2px 0 6px}
+  .moreBtn:hover{background:#f4f6fa}
+  .detail{animation:fadeIn .25s}
+  @keyframes fadeIn{from{opacity:0}to{opacity:1}}
+  .explain .why{margin-top:6px;padding:7px 10px;background:#f7f2ff;border-left:5px solid var(--temp);border-radius:6px;font-size:13.5px}
+  .explain .tick{color:#11683a;font-weight:700}
+  .zoomCap{font-size:11.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;margin:0 0 4px}
+  canvas.c2{width:100%;display:block;border-radius:8px;border:1px solid var(--line);background:#fff}
+  .rule{font-size:13px;padding:8px 10px;border:2px dashed var(--temp);border-radius:10px;background:#f7f2ff}
   #noGL{display:none;padding:20px;color:#9b1f1f}
 </style>
 </head>
 <body>
-<header>
-  <h1>Why is the alternator easier to turn when it is disconnected? Step by step</h1>
-  <p class="sub">Work through the <b>connected</b> steps first, then the <b>disconnected</b> steps. Your hand pushes the handle with the same steady effort throughout.</p>
-</header>
-
-<div class="wrap">
-  <div class="card full">
-    <div class="track"><div class="trackName on">A. CONNECTED<br><span style="font-weight:400;font-size:12px">(lamp in the circuit)</span></div><div id="trackOn" style="display:contents"></div></div>
-    <div class="track"><div class="trackName off">B. DISCONNECTED<br><span style="font-weight:400;font-size:12px">(circuit broken)</span></div><div id="trackOff" style="display:contents"></div></div>
-    <div class="navRow">
+<div class="app">
+  <div class="top">
+    <div class="titleRow">
+      <h1>Why is the alternator easier to turn when it is disconnected?</h1>
       <button class="navBtn ghost" id="back">◀ Back</button>
       <button class="navBtn" id="next">Next step ▶</button>
-      <button class="navBtn ghost" id="free">Free play (everything on)</button>
+      <button class="navBtn ghost" id="free">Free play</button>
       <button class="small" id="pause">❚❚ Pause</button>
-      <span style="font-size:13.5px;font-weight:700">Playback:</span><span class="seg" id="speedSeg"><button data-f="0.1">Very slow</button><button data-f="0.25" class="active">Slow</button><button data-f="0.5">Medium</button><button data-f="1">Real speed</button></span>
+      <span class="seg" id="speedSeg"><button data-f="0.1">Very slow</button><button data-f="0.25" class="active">Slow</button><button data-f="0.5">Medium</button><button data-f="1">Real</button></span>
     </div>
+    <div class="track"><div class="trackName on">A. CONNECTED<span>lamp in the circuit</span></div><div id="trackOn" style="display:contents"></div></div>
+    <div class="track"><div class="trackName off">B. DISCONNECTED<span>circuit broken</span></div><div id="trackOff" style="display:contents"></div></div>
   </div>
 
-  <div class="card">
-    <h2>Inside the alternator (Figure 17)</h2>
-    <div class="callout" id="callout"></div>
-    <div class="stage" id="stage">
-      <canvas id="three"></canvas>
-      <div class="labels" id="labels"></div>
-      <div class="viewBtns"><button class="small" id="vFig">Reset view</button></div>
+  <div class="main">
+    <div class="panel" style="padding:0">
+      <div class="stage" id="stage">
+        <canvas id="three"></canvas>
+        <div class="labels" id="labels"></div>
+        <div class="callout" id="callout"></div>
+        <div class="trend" id="trend"></div>
+        <div class="viewBtns"><button class="small" id="vFig">Reset view</button></div>
+        <div class="diag bubble" id="bDiag"><canvas id="circDiag" width="540" height="340"></canvas></div>
+        <div class="key">
+          <span><i style="background:var(--perm)"></i>Magnets' field</span>
+          <span><i style="background:var(--cut)"></i>Line being cut</span>
+          <span><i style="background:var(--cur)"></i>Induced current</span>
+          <span><i style="background:var(--temp)"></i>Temporary field</span>
+          <span><i style="background:var(--move)"></i>Motion</span>
+          <span><i style="background:var(--push)"></i>Push-back</span>
+        </div>
+      </div>
+      <div id="noGL">The 3D view could not load (it needs cdnjs.cloudflare.com). The instruments, close-up and explanations still work.</div>
     </div>
-    <div class="dials"><canvas id="vDial" width="300" height="210"></canvas><canvas id="aDial" width="300" height="210"></canvas><span class="dialNote">Voltmeter and ammeter connected through the brushes</span></div>
-    <div id="noGL">The 3D view could not load (it needs cdnjs.cloudflare.com). The close-up and the explanations still work.</div>
-    <div class="key">
-      <span><i style="background:var(--perm)"></i>Permanent field (magnets)</span>
-      <span><i style="background:var(--cut)"></i>Field line being cut</span>
-      <span><i style="background:var(--cur)"></i>Induced current</span>
-      <span><i style="background:var(--temp)"></i>Temporary field</span>
-      <span><i style="background:var(--move)"></i>Motion</span>
-      <span><i style="background:var(--push)"></i>Push-back force</span>
+
+    <div class="instr">
+      <div class="bubble" id="bCirc">
+        <h3>Circuit</h3>
+        <div class="circ"><div class="circState" id="circState"></div><div class="lamp" id="lamp" title="lamp"></div></div>
+        <button id="sw" class="switch off">Tap to connect</button>
+      </div>
+      <div class="bubble" id="bVolt"><h3>Voltmeter (pd)</h3><canvas id="vDial" width="300" height="175"></canvas></div>
+      <div class="bubble" id="bAmm"><h3>Ammeter (current)</h3><canvas id="aDial" width="300" height="175"></canvas></div>
+      <div class="bubble" id="bSpeed"><h3>Coil speed</h3>
+        <div class="speedNum" id="speedNum">0.0</div><div class="speedLbl">turns per second</div>
+        <canvas id="speedGraph" width="400" height="230" style="margin-top:4px"></canvas>
+        <div class="pushRow">Hand push<input type="range" id="push" min="10" max="100" value="41"></div>
+      </div>
+    </div>
+
+    <div class="right">
+      <div class="panel explain" id="explain"></div>
+      <div class="panel bubble" id="bZoom"><p class="zoomCap">Close-up: one side of the coil, seen end-on</p><canvas id="zoom" class="c2" width="1120" height="560"></canvas></div>
     </div>
   </div>
-
-  <div class="card">
-    <h2>What is happening</h2>
-    <div class="explain" id="explain"></div>
-    <div class="speedBox">
-      <div><div class="speedNum" id="speedNum">0.0</div><div class="speedLbl">turns per second (real alternator; the animation is slowed down)</div></div>
-      <div class="lamp" id="lamp" title="lamp"></div>
-    </div>
-    <canvas id="speedGraph" class="c2" width="800" height="240" style="margin-top:6px"></canvas>
-    <button id="sw" class="switch off">DISCONNECTED (tap to connect)</button>
-    <div class="row"><span>How hard your hand pushes</span><input type="range" id="push" min="10" max="100" value="41"></div>
-  </div>
-
-  <div class="card full">
-    <h2>Close-up: one side of the coil, seen end-on (looking along the axle from the slip-ring end)</h2>
-    <canvas id="zoom" class="c2" width="1600" height="560"></canvas>
-  </div>
-
-  <div class="card full rule"><b>Lenz's law in one sentence:</b> the induced current always makes a magnetic field that <b>pushes back against the movement that caused it</b>. If it helped the movement instead, the coil would speed itself up and light the lamp for free. That is impossible, because energy cannot be created.</div>
 </div>
 
 <script>
@@ -160,8 +179,8 @@ const STEPS = {
    body:'Any wire that carries a current has a <b>magnetic field in circles around it</b> (right-hand grip rule).<br>This <b style="color:var(--temp)">purple field</b> is <b>temporary</b>: it is only there while the induced current flows.<br>It is <b>clockwise</b> around one side of the coil and <b>anticlockwise</b> around the other, because the current goes <b>into</b> the page along one side and comes back <b>out</b> of the page along the other.'},
   {short:'Temporary field pushes → push-back',
    title:'5. The temporary field pushes against the magnets\' field, so there is a push-back force',
-   call:'Red arrow = push-back force. It always points against the green motion arrow, so it slows the coil. See the close-up below.',
-   body:'Look at the <b>close-up</b> below. The purple field and the magnets\' blue field <b>combine</b>:<br>• on one side of the wire they point the <b>same way</b>, so they <b>add</b> and the field is <b>stronger</b>;<br>• on the other side they point <b>opposite ways</b>, so they <b>cancel</b> and the field is <b>weaker</b>.<br>The wire is <b>pushed from the stronger side to the weaker side</b> (the motor effect). That <b style="color:var(--push)">push-back force</b> is <b>always opposite to the motion</b>, so it <b>slows the coil</b> and the handle is <b>hard to turn</b>.',
+   call:'The red push-back arrow always points against the green motion arrow. Watch the close-up below.',
+   body:'In the close-up, the purple field and the magnets\' blue field <b>combine</b>. On one side of the wire they point the <b>same way</b> and <b>add</b>, so the field is <b>stronger</b>. On the other side they point <b>opposite ways</b> and <b>cancel</b>, so it is <b>weaker</b>. The wire is <b>pushed from stronger to weaker</b>, which is <b>always against its motion</b>, so the coil <b>slows down</b> and the handle is <b>hard to turn</b>.',
    why:'This is <b>Lenz\'s law</b>: the induced current opposes the movement that caused it. Your hand has to do extra work against the push-back, and that work becomes the energy that lights the lamp.'}
  ],
  off: [
@@ -190,7 +209,7 @@ const STEPS = {
    why:'<span class="tick">✓ Mark 3:</span> so there is nothing to oppose the movement of the coil, and the handle is much easier to turn.'}
  ]
 };
-const G = {track:'on', step:0, free:false};   // step index 0..4
+const G = {track:'on', step:0, free:false, more:false};   // step index 0..4
 function flags(){
   if (G.free) return {cut:true, volt:true, amm:true, cur:true, temp:true, push:true, connected:S.manualConn};
   const s = G.step+1, on = G.track==='on';
@@ -201,13 +220,15 @@ function flags(){
 // ================= PHYSICS =================
 const k=0.15, R=0.90, J=0.02;
 const fric = w => 0.004*w + 0.0002*w*w;
-const S = {phi:0.4, w:0, connected:false, manualConn:false, paused:false, t:0, emf:0, I:0, hist:[], marks:[], pow:0};
+const S = {phi:0.4, w:0, acc:0, connected:false, manualConn:false, paused:false, t:0, emf:0, I:0, hist:[], marks:[], pow:0};
 const handTorque = () => $('push').value/100*0.1;
 function physStep(dt){
   const emf = -k*S.w*Math.cos(S.phi);
   S.emf = emf; S.I = S.connected ? emf/R : 0;
   const brake = S.connected ? k*k*S.w*Math.cos(S.phi)**2/R : 0;
   S.w = Math.max(0, S.w + (handTorque()-brake-fric(S.w))/J*dt);
+  // trend uses the brake averaged over a turn, so the wobble within each turn does not flicker the badge
+  if (dt>0){ const acc=(handTorque() - (S.connected ? k*k*S.w/(2*R) : 0) - fric(S.w))/J; S.acc += (acc-S.acc)*Math.min(1,dt*1.5); }
   S.phi += S.w*dt; S.t += dt;
   S.pow += ((S.connected? emf*S.I:0) - S.pow)*Math.min(1,dt*3);
 }
@@ -331,8 +352,8 @@ function build3D(){
   const lCut=lab('field line being cut!','',()=>V(0,1.25,0.7)); lCut.el.style.color='#b37800'; lCut.el.style.fontWeight='700';
   let cutShow=0;
 
-  function resize(){ const w=stage.clientWidth,h=Math.round(w*0.78); renderer.setSize(w,h,false); canvas.style.height=h+'px'; camera.aspect=w/h; camera.updateProjectionMatrix(); }
-  window.addEventListener('resize',resize); resize();
+  function resize(){ const w=Math.max(50,stage.clientWidth),h=Math.max(50,stage.clientHeight); renderer.setSize(w,h,false); camera.aspect=w/h; camera.updateProjectionMatrix(); }
+  window.addEventListener('resize',resize); if (window.ResizeObserver) new ResizeObserver(resize).observe(stage); resize();
 
   let prevY=[side(1).y, side(-1).y];
   return function(dt, rdt, F){
@@ -392,7 +413,7 @@ try { draw3D = build3D(); } catch(e){ $('noGL').style.display='block'; $('stage'
 function dial(cv, value, max, unit, label, active, note){
   const c=cv.getContext('2d'), W=cv.width, H=cv.height; c.clearRect(0,0,W,H);
   c.globalAlpha = active?1:0.3;
-  const cx=W/2, cy=H-38, R0=110;
+  const cx=W/2, cy=H-36, R0=100;
   c.strokeStyle='#333'; c.lineWidth=3; c.beginPath(); c.arc(cx,cy,R0,Math.PI*1.15,Math.PI*1.85); c.stroke();
   for (let t=-1;t<=1;t+=0.25){ const a=-Math.PI/2+t*0.35*Math.PI; c.beginPath(); c.moveTo(cx+Math.cos(a)*R0,cy+Math.sin(a)*R0); c.lineTo(cx+Math.cos(a)*(R0-(t%1===0||t===0?18:10)),cy+Math.sin(a)*(R0-(t%1===0||t===0?18:10))); c.stroke(); }
   c.fillStyle='#333'; c.font='bold 22px Arial'; c.textAlign='center'; c.fillText('0',cx,cy-R0+40);
@@ -401,7 +422,7 @@ function dial(cv, value, max, unit, label, active, note){
   const a=-Math.PI/2+v*0.35*Math.PI;
   c.strokeStyle='#d63a3a'; c.lineWidth=5; c.beginPath(); c.moveTo(cx,cy); c.lineTo(cx+Math.cos(a)*(R0-8),cy+Math.sin(a)*(R0-8)); c.stroke();
   c.fillStyle='#222'; c.beginPath(); c.arc(cx,cy,9,0,Math.PI*2); c.fill();
-  c.font='20px Arial'; c.fillText(active?(label+': '+value.toFixed(2)+' '+unit):label, cx, H-8);
+  c.font='bold 22px Arial'; c.fillText(active?(value.toFixed(2)+' '+unit):'not connected yet', cx, H-8);
   c.globalAlpha=1;
   if (note){ c.fillStyle='#9b1f1f'; c.font='bold 22px Arial'; c.fillText(note,cx,34); }
 }
@@ -413,104 +434,159 @@ function arr(x1,y1,x2,y2,col,w,head=18){ const a=Math.atan2(y2-y1,x2-x1); if(Mat
   z.fillStyle=col; z.beginPath(); z.moveTo(x2,y2); z.lineTo(x2-head*Math.cos(a-.45),y2-head*Math.sin(a-.45)); z.lineTo(x2-head*Math.cos(a+.45),y2-head*Math.sin(a+.45)); z.closePath(); z.fill(); }
 function drawZoom(F){
   const W=zc.width,H=zc.height; z.clearRect(0,0,W,H);
-  const cx=560, cy=H/2;
+  const cx=560, cy=H/2+10, MX=110;
   const i=In(), flowing=S.connected && Math.abs(i)>0.03;
   const vy=Math.cos(S.phi), up=vy>0;
-  const into = flowing ? i<0 : up;      // side A: current into page while moving up
+  const into = flowing ? i<0 : up;
   const a = Math.min(1,0.3+0.9*Math.abs(i));
-  // magnets
-  z.fillStyle='#d6d6d6'; z.strokeStyle='#222'; z.lineWidth=2;
-  z.fillRect(0,60,110,H-120); z.strokeRect(0,60,110,H-120); z.fillRect(1010,60,110,H-120); z.strokeRect(1010,60,110,H-120);
-  z.fillStyle='#222'; z.font='bold 44px Arial'; z.textAlign='center'; z.textBaseline='middle'; z.fillText('N',55,cy); z.fillText('S',1065,cy);
   const showT = F.temp && flowing, showP = F.push && flowing;
+  z.textBaseline='middle';
+  // magnets
+  z.fillStyle='#d6d6d6'; z.strokeStyle='#222'; z.lineWidth=3;
+  z.fillRect(0,50,MX,H-80); z.strokeRect(0,50,MX,H-80); z.fillRect(W-MX,50,MX,H-80); z.strokeRect(W-MX,50,MX,H-80);
+  z.fillStyle='#222'; z.font='bold 56px Arial'; z.textAlign='center'; z.fillText('N',MX/2,cy); z.fillText('S',W-MX/2,cy);
+  // stronger / weaker zones
   if (showP){
-    const ys = into? cy-95 : cy+95, yw = into? cy+95 : cy-95;
-    z.fillStyle=`rgba(232,130,12,${0.3*a})`; z.beginPath(); z.ellipse(cx,ys,170,62,0,0,Math.PI*2); z.fill();
-    z.fillStyle=`rgba(47,111,222,${0.2*a})`; z.beginPath(); z.ellipse(cx,yw,170,62,0,0,Math.PI*2); z.fill();
-    z.font='bold 19px Arial'; z.fillStyle='#a2560a'; z.fillText('same direction → fields ADD → STRONGER', cx, ys+(into?-74:74));
-    z.fillStyle='#2f5fb8'; z.fillText('opposite directions → fields CANCEL → WEAKER', cx, yw+(into?74:-74));
+    const ys = into? cy-105 : cy+105, yw = into? cy+105 : cy-105;
+    z.fillStyle=`rgba(232,130,12,${0.32*a})`; z.beginPath(); z.ellipse(cx,ys,190,62,0,0,Math.PI*2); z.fill();
+    z.fillStyle=`rgba(47,111,222,${0.22*a})`; z.beginPath(); z.ellipse(cx,yw,190,62,0,0,Math.PI*2); z.fill();
+    z.font='bold 32px Arial'; z.fillStyle='#a2560a'; z.fillText('fields ADD → STRONGER', cx, ys+(into?-80:80));
+    z.fillStyle='#2f5fb8'; z.fillText('fields CANCEL → WEAKER', cx, yw+(into?80:-80));
   }
-  // field lines (wire "moves" through them: lines scroll opposite to the motion so students see the cutting)
-  const scroll = ((Math.sin(S.phi)*220) % 50 + 50) % 50;   // follows the wire's real up/down movement
-  z.lineWidth=3;
+  // field lines; they slide past the wire in step with its real up/down movement
+  const scroll = ((Math.sin(S.phi)*220) % 60 + 60) % 60;
   for (let n=-5;n<=5;n++){
-    let y = cy + n*50 + (F.cut ? scroll : 0);
-    if (y<70 || y>H-70) continue;
-    const near = F.cut && Math.abs(y-cy)<10;
-    z.strokeStyle = near ? '#f5a400' : '#4a6fa5'; z.lineWidth = near?6:3;
-    z.beginPath(); z.moveTo(115,y); z.lineTo(1005,y); z.stroke();
-    arr(240,y,262,y,near?'#f5a400':'#4a6fa5',3,14); arr(860,y,882,y,near?'#f5a400':'#4a6fa5',3,14);
+    const y = cy + n*60 + (F.cut ? scroll : 0) - 30;
+    if (y<60 || y>H-40) continue;
+    const near = F.cut && Math.abs(y-cy)<12;
+    const col = near ? '#f5a400' : '#4a6fa5';
+    z.strokeStyle=col; z.lineWidth = near?8:4;
+    z.beginPath(); z.moveTo(MX+4,y); z.lineTo(W-MX-4,y); z.stroke();
+    arr(MX+60,y,MX+90,y,col,4,18); arr(W-MX-90,y,W-MX-60,y,col,4,18);
   }
-  if (F.cut){ z.fillStyle='#b37800'; z.font='bold 18px Arial'; z.textAlign='left'; z.fillText('the wire cuts through the field lines (yellow = line being cut)', 520, 32); }
+  if (F.cut){ z.fillStyle='#b37800'; z.font='bold 28px Arial'; z.textAlign='center'; z.fillText('yellow = field line being cut', W/2, 24); }
+  // temporary circles
   if (showT){
-    z.globalAlpha=a; z.lineWidth=4;
-    for (const rr of [55,95]){
+    z.globalAlpha=a; z.lineWidth=6;
+    for (const rr of [58,100]){
       z.strokeStyle='#8a3ffc'; z.beginPath(); z.arc(cx,cy,rr,0,Math.PI*2); z.stroke();
       for (const ang of [-Math.PI/2, Math.PI/2, 0, Math.PI]){
         const px=cx+rr*Math.cos(ang), py=cy+rr*Math.sin(ang);
         let tx=-Math.sin(ang), ty=Math.cos(ang); if(!into){tx=-tx;ty=-ty;}
-        arr(px-tx*10,py-ty*10,px+tx*12,py+ty*12,'#8a3ffc',4,16);
+        arr(px-tx*12,py-ty*12,px+tx*14,py+ty*14,'#8a3ffc',6,22);
       }
     }
     z.globalAlpha=1;
-    z.fillStyle='#8a3ffc'; z.font='bold 20px Arial'; z.textAlign='left';
-    z.fillText('temporary field: '+(into?'CLOCKWISE':'ANTICLOCKWISE'), cx+110, cy-8);
+    z.fillStyle='#8a3ffc'; z.font='bold 32px Arial'; z.textAlign='left';
+    z.fillText(into?'clockwise':'anticlockwise', cx+118, cy);
   }
   if (F.noTemp){
-    z.setLineDash([8,8]); z.strokeStyle='#bbb'; z.lineWidth=3; z.beginPath(); z.arc(cx,cy,75,0,Math.PI*2); z.stroke(); z.setLineDash([]);
-    z.fillStyle='#9b1f1f'; z.font='bold 20px Arial'; z.textAlign='left'; z.fillText('NO temporary field', cx+110, cy-8);
+    z.setLineDash([10,10]); z.strokeStyle='#aaa'; z.lineWidth=4; z.beginPath(); z.arc(cx,cy,80,0,Math.PI*2); z.stroke(); z.setLineDash([]);
+    z.fillStyle='#9b1f1f'; z.font='bold 30px Arial'; z.textAlign='left'; z.fillText('NO temporary field', cx+100, cy);
   }
   // wire
-  z.beginPath(); z.arc(cx,cy,26,0,Math.PI*2); z.fillStyle='#f3e6d6'; z.fill(); z.lineWidth=5; z.strokeStyle='#7a5230'; z.stroke();
-  z.strokeStyle='#222'; z.fillStyle='#222'; z.lineWidth=4;
-  if (F.cur && flowing){ if(into){ z.beginPath(); z.moveTo(cx-12,cy-12); z.lineTo(cx+12,cy+12); z.moveTo(cx+12,cy-12); z.lineTo(cx-12,cy+12); z.stroke(); } else { z.beginPath(); z.arc(cx,cy,7,0,Math.PI*2); z.fill(); }
-    z.fillStyle='#c0650a'; z.font='bold 16px Arial'; z.textAlign='left'; z.fillText('current '+(into?'into':'out of')+' the page', cx+110, cy+20); }
-  if (F.noCur){ z.fillStyle='#9b1f1f'; z.font='bold 16px Arial'; z.textAlign='left'; z.fillText('no current', cx+110, cy+20); }
+  z.beginPath(); z.arc(cx,cy,30,0,Math.PI*2); z.fillStyle='#f3e6d6'; z.fill(); z.lineWidth=6; z.strokeStyle='#7a5230'; z.stroke();
+  z.strokeStyle='#222'; z.fillStyle='#222'; z.lineWidth=5;
+  if (F.cur && flowing){
+    if(into){ z.beginPath(); z.moveTo(cx-14,cy-14); z.lineTo(cx+14,cy+14); z.moveTo(cx+14,cy-14); z.lineTo(cx-14,cy+14); z.stroke(); } else { z.beginPath(); z.arc(cx,cy,8,0,Math.PI*2); z.fill(); }
+    if (!showT){ z.fillStyle='#c0650a'; z.font='bold 28px Arial'; z.textAlign='left'; z.fillText('current '+(into?'into page ⊗':'out of page ⊙'), cx+50, cy); }
+  }
+  if (F.noCur && !F.noTemp){ z.fillStyle='#9b1f1f'; z.font='bold 30px Arial'; z.textAlign='left'; z.fillText('no current', cx+50, cy); }
   // motion & push-back
-  const mx=cx-300; z.textAlign='center';
-  if (S.w>0.3){ arr(mx-40, cy+(up?60:-60), mx-40, cy+(up?-60:60), '#1f9d55', 9, 26);
-    z.fillStyle='#1f9d55'; z.font='bold 20px Arial'; z.fillText('motion', mx-40, cy+(up?95:-95)); }
-  if (showP){ const pushUp=!up; const Lp=40+50*Math.min(1,Math.abs(i));
-    arr(mx+50, cy+(pushUp?Lp:-Lp), mx+50, cy+(pushUp?-Lp:Lp), '#d63a3a', 11, 28);
-    z.fillStyle='#d63a3a'; z.font='bold 20px Arial'; z.fillText('push-back', mx+50, cy+(pushUp?Lp+35:-Lp-35));
-    z.font='16px Arial'; z.fillText('(stronger → weaker)', mx+50, cy+(pushUp?Lp+58:-Lp-58)); }
-  if (F.noPush){ z.fillStyle='#11683a'; z.font='bold 20px Arial'; z.fillText('no push-back!', mx+60, cy); }
-  // title
-  z.textAlign='left'; z.font='bold 22px Arial'; z.fillStyle='#1d2433'; z.fillText('One side of the coil, seen end-on', 130, 32);
-  // side text
-  let lines;
-  if (G.free) lines=['Free play: everything is switched on.','Use the switch on the right to','connect or disconnect.'];
-  else if (G.track==='on') lines=[
-    ['Step 1','The wire moves (green).'],
-    ['Step 2','The wire moves through the','field lines and cuts them,','so a pd is induced.'],
-    ['Step 3','The circuit is complete, so a','current flows along the wire','(⊗ into or ⊙ out of the page).'],
-    ['Step 4','The current makes a circular,','TEMPORARY field round the wire.'],
-    ['Step 5','Temporary + permanent field:','• one side: same direction → stronger','• other side: opposite → weaker','The wire is pushed from stronger','to weaker, AGAINST its motion.','So the coil slows down.']][G.step];
-  else lines=[
-    ['Step 1','The wire moves (green).','The circuit is broken.'],
-    ['Step 2','The wire still cuts the field lines,','so a pd is STILL induced.'],
-    ['Step 3','There is no complete circuit,','so there is NO current.'],
-    ['Step 4','No current means NO temporary','field around the wire.'],
-    ['Step 5','The magnets\' field is just straight','lines, so nothing pushes on the wire.','No push-back, so the coil speeds','up and is easy to turn.']][G.step];
-  lines.forEach((t,n)=>{ z.font = n===0?'bold 22px Arial':'18px Arial'; z.fillStyle = n===0 ? (G.track==='on'&&!G.free?'#11683a':'#9b1f1f') : '#333'; z.fillText(t, 1150, 80+n*34); });
+  const mx=cx-290; z.textAlign='center';
+  if (S.w>0.3){ arr(mx-40, cy+(up?70:-70), mx-40, cy+(up?-70:70), '#1f9d55', 12, 32);
+    z.fillStyle='#1f9d55'; z.font='bold 30px Arial'; z.fillText('motion', mx-40, cy+(up?100:-100)); }
+  if (showP){ const pushUp=!up; const Lp=45+45*Math.min(1,Math.abs(i));
+    arr(mx+70, cy+(pushUp?Lp:-Lp), mx+70, cy+(pushUp?-Lp:Lp), '#d63a3a', 14, 34);
+    z.fillStyle='#d63a3a'; z.font='bold 30px Arial'; z.fillText('push-back', mx+70, cy+(pushUp?Lp+32:-Lp-32)); }
+  if (F.noPush){ z.fillStyle='#11683a'; z.font='bold 30px Arial'; z.fillText('no push-back', mx+100, cy); }
+  z.textBaseline='alphabetic';
 }
 
+
+// ================= CIRCUIT DIAGRAM =================
+const cd=$('circDiag'), q=cd.getContext('2d'); let cPhase=0;
+function drawCircuit(dt, F){
+  const W=cd.width,H=cd.height; q.clearRect(0,0,W,H);
+  const on=S.connected, L=120, R=470, T=95, B=275, my=(T+B)/2;
+  const col = on ? '#1d2433' : '#1d2433';
+  q.textAlign='center'; q.textBaseline='middle';
+  // status title
+  q.font='bold 30px Arial'; q.fillStyle = on ? '#11683a' : '#9b1f1f';
+  q.fillText(on ? '✓ COMPLETE CIRCUIT: current flows' : '✗ BROKEN CIRCUIT: no current', W/2, 28);
+  // wires
+  q.strokeStyle=col; q.lineWidth=5; q.lineCap='round';
+  const swA=220, swB=300;
+  q.beginPath(); q.moveTo(L,my-34); q.lineTo(L,T); q.lineTo(swA,T); q.stroke();         // source top -> switch
+  q.beginPath(); q.moveTo(swB,T); q.lineTo(R,T); q.lineTo(R,my-30); q.stroke();          // switch -> lamp
+  q.beginPath(); q.moveTo(R,my+30); q.lineTo(R,B); q.lineTo(L,B); q.lineTo(L,my+34); q.stroke(); // lamp -> back to source
+  // voltmeter branch across the source
+  const vx=45;
+  q.lineWidth=3; q.beginPath(); q.moveTo(L,T+20); q.lineTo(vx,T+20); q.lineTo(vx,my-24); q.moveTo(vx,my+24); q.lineTo(vx,B-20); q.lineTo(L,B-20); q.stroke();
+  q.beginPath(); q.arc(vx,my,24,0,Math.PI*2); q.fillStyle='#fff'; q.fill(); q.lineWidth=3; q.stroke();
+  q.fillStyle='#1d2433'; q.font='bold 26px Arial'; q.fillText('V',vx,my+1);
+  // source (coil via slip rings): circle with ~
+  q.lineWidth=5; q.beginPath(); q.arc(L,my,34,0,Math.PI*2); q.fillStyle='#fff'; q.fill(); q.stroke();
+  q.font='bold 40px Arial'; q.fillStyle='#7a5230'; q.fillText('~',L,my+2);
+  q.font='19px Arial'; q.fillStyle='#5f6b7f'; q.textAlign='left'; q.fillText('coil (via slip', L+42, my-12); q.fillText('rings + brushes)', L+42, my+12);
+  // ammeter on the top wire
+  const ax=390; q.textAlign='center';
+  q.beginPath(); q.arc(ax,T,22,0,Math.PI*2); q.fillStyle='#fff'; q.fill(); q.lineWidth=4; q.strokeStyle=col; q.stroke();
+  q.fillStyle='#1d2433'; q.font='bold 24px Arial'; q.fillText('A',ax,T+1);
+  // switch
+  q.fillStyle='#1d2433'; q.beginPath(); q.arc(swA,T,7,0,Math.PI*2); q.fill(); q.beginPath(); q.arc(swB,T,7,0,Math.PI*2); q.fill();
+  q.lineWidth=6; q.strokeStyle = on ? '#1f9d55' : '#d63a3a';
+  q.beginPath(); q.moveTo(swA,T);
+  if (on) q.lineTo(swB,T); else q.lineTo(swB-8,T-58);
+  q.stroke();
+  q.font='bold 20px Arial'; q.fillStyle = on ? '#1f9d55' : '#d63a3a';
+  q.fillText(on ? 'switch closed' : 'switch OPEN', (swA+swB)/2, T+30);
+  if (!on){
+    // highlight the gap
+    q.setLineDash([6,5]); q.strokeStyle='#d63a3a'; q.lineWidth=3;
+    q.beginPath(); q.ellipse(swB-6,T,26,22,0,0,Math.PI*2); q.stroke(); q.setLineDash([]);
+    q.font='bold 22px Arial'; q.fillStyle='#d63a3a'; q.fillText('GAP', swB+44, T-30);
+  }
+  // lamp
+  const P=Math.max(0,S.pow), gl=Math.min(1,P/0.09);
+  if (on && gl>0.03){ const gr=q.createRadialGradient(R,my,6,R,my,40+50*gl); gr.addColorStop(0,`rgba(255,210,0,${0.85*gl})`); gr.addColorStop(1,'rgba(255,210,0,0)'); q.fillStyle=gr; q.beginPath(); q.arc(R,my,40+50*gl,0,Math.PI*2); q.fill(); }
+  q.beginPath(); q.arc(R,my,30,0,Math.PI*2); q.fillStyle = (on&&gl>0.03)?`rgb(255,${235-50*gl},${140-110*gl})`:'#fff'; q.fill(); q.lineWidth=5; q.strokeStyle=col; q.stroke();
+  q.beginPath(); q.moveTo(R-21,my-21); q.lineTo(R+21,my+21); q.moveTo(R+21,my-21); q.lineTo(R-21,my+21); q.stroke();
+  q.font='19px Arial'; q.fillStyle='#5f6b7f'; q.textAlign='right'; q.fillText('lamp', R-40, my);
+  // moving current (orange dots) round the whole loop, reversing with the AC
+  q.textAlign='center';
+  if (on){
+    const path=[[L,T],[R,T],[R,B],[L,B],[L,T]]; const seg=[]; let tot=0;
+    for (let k=0;k<4;k++){ const d=Math.hypot(path[k+1][0]-path[k][0],path[k+1][1]-path[k][1]); seg.push(d); tot+=d; }
+    cPhase += -S.I*dt*900;
+    const n=Math.round(tot/44), mag=Math.min(1,Math.abs(S.I)/0.3);
+    q.fillStyle=`rgba(232,130,12,${0.35+0.65*mag})`;
+    for (let k=0;k<n;k++){
+      let d=((k*tot/n + cPhase)%tot+tot)%tot, j=0; while(d>seg[j]){ d-=seg[j]; j++; }
+      const f=d/seg[j], x=path[j][0]+(path[j+1][0]-path[j][0])*f, y=path[j][1]+(path[j+1][1]-path[j][1])*f;
+      if (Math.hypot(x-L,y-my)<36 || Math.hypot(x-R,y-my)<32 || Math.hypot(x-ax,y-T)<24) continue;
+      q.beginPath(); q.arc(x,y,7,0,Math.PI*2); q.fill();
+    }
+    q.font='bold 20px Arial'; q.fillStyle='#c0650a'; q.fillText('current flows all the way round (and reverses: AC)', W/2, B+40);
+  } else {
+    q.font='bold 22px Arial'; q.fillStyle='#9b1f1f'; q.fillText('no current anywhere, so the lamp is off', W/2, B+40);
+  }
+}
 // ================= SPEED GRAPH =================
 const sg=$('speedGraph'), g=sg.getContext('2d');
 function drawSpeed(){
-  const W=sg.width,H=sg.height,span=12*PLAY+6*(1-PLAY),left=50,top=30,bot=H-32; g.clearRect(0,0,W,H);
+  const W=sg.width,H=sg.height,span=12*PLAY+6*(1-PLAY),left=34,top=10,bot=H-26; g.clearRect(0,0,W,H);
   const maxT=1.5;
-  g.strokeStyle='#e3e7ef'; g.lineWidth=1; g.strokeRect(left,top,W-left-10,bot-top);
-  g.fillStyle='#5f6b7f'; g.font='15px Arial'; g.textAlign='right';
-  for (let v=0; v<=maxT+1e-9; v+=0.5){ const y=bot-v/maxT*(bot-top); g.fillText(v,left-8,y+5); }
-  g.textAlign='left'; g.fillStyle='#1d2433'; g.font='bold 16px Arial'; g.fillText('Speed of the coil (turns per second)', left, 20);
-  g.strokeStyle='#1d2433'; g.lineWidth=3; g.beginPath(); let st=false;
-  for (const h of S.hist){ const x=left+(1-(S.t-h.t)/span)*(W-left-10); if(x<left)continue; const y=bot-Math.min(maxT,h.v)/maxT*(bot-top); st?g.lineTo(x,y):(g.moveTo(x,y),st=true); }
+  g.strokeStyle='#e3e7ef'; g.lineWidth=1; g.strokeRect(left,top,W-left-6,bot-top);
+  g.fillStyle='#5f6b7f'; g.font='16px Arial'; g.textAlign='right';
+  for (let v=0; v<=maxT+1e-9; v+=0.5){ const y=bot-v/maxT*(bot-top); g.fillText(v,left-5,y+5); }
+  g.strokeStyle='#1d2433'; g.lineWidth=3.5; g.beginPath(); let st=false;
+  for (const h of S.hist){ const x=left+(1-(S.t-h.t)/span)*(W-left-6); if(x<left)continue; const y=bot-Math.min(maxT,h.v)/maxT*(bot-top); st?g.lineTo(x,y):(g.moveTo(x,y),st=true); }
   g.stroke();
-  g.font='bold 14px Arial';
-  for (const m of S.marks){ const x=left+(1-(S.t-m.t)/span)*(W-left-10); if(x<left)continue;
+  g.font='bold 16px Arial'; g.textAlign='left';
+  for (const m of S.marks){ const x=left+(1-(S.t-m.t)/span)*(W-left-6); if(x<left)continue;
     g.strokeStyle=m.on?'#d63a3a':'#1f9d55'; g.setLineDash([6,5]); g.beginPath(); g.moveTo(x,top); g.lineTo(x,bot); g.stroke(); g.setLineDash([]);
-    g.fillStyle=m.on?'#d63a3a':'#1f9d55'; g.fillText(m.on?'connected → slows':'disconnected → speeds up', x+5, bot+20); }
+    if (m===S.marks[S.marks.length-1]){ g.fillStyle=m.on?'#d63a3a':'#1f9d55'; g.fillText(m.on?'connected':'disconnected', Math.min(x+4,W-110), bot+19); } }
 }
 
 // ================= UI =================
@@ -521,6 +597,7 @@ function buildTracks(){
       b.onclick=()=>goTo(tr,i); b.dataset.tr=tr; b.dataset.i=i; host.appendChild(b); });
   }
 }
+const FOCUS = { on:[['bSpeed'],['bVolt'],['bAmm','bCirc','bDiag'],['bZoom'],['bZoom','bSpeed']], off:[['bCirc','bDiag'],['bVolt'],['bAmm','bCirc','bDiag'],['bZoom'],['bSpeed']] };
 function render(){
   document.querySelectorAll('.stepBtn').forEach(b=>{
     const isCur = !G.free && b.dataset.tr===G.track && +b.dataset.i===G.step;
@@ -528,16 +605,23 @@ function render(){
     b.className='stepBtn'+(isCur?' cur '+(G.track==='on'?'onT':'offT'):'')+(done?' done':'');
   });
   const sw=$('sw');
+  document.querySelectorAll('.bubble').forEach(b=>b.classList.remove('focus'));
   if (G.free){
-    $('callout').innerHTML='<div class="t">Free play</div>Everything is switched on. Use the switch to connect or disconnect.';
-    $('explain').innerHTML='<div class="title">Free play</div>All the layers are on. Press the switch below to connect or disconnect the lamp, and watch the speed, the meters, the purple temporary field and the red push-back force.';
+    $('callout').textContent='Free play';
+    $('callout').style.borderColor='#1d2433';
+    $('explain').innerHTML='<div class="title">Free play</div>All the layers are on. Use the button in the Circuit bubble to connect or disconnect the lamp, and watch the speed, the meters, the purple temporary field and the red push-back force.';
     sw.style.display='block';
   } else {
-    const s=STEPS[G.track][G.step];
-    $('callout').innerHTML=`<div class="t">${G.track==='on'?'A':'B'}${G.step+1}. ${s.short}</div>${s.call}`;
-    $('callout').style.borderColor = G.track==='on' ? '#11683a' : '#9b1f1f';
-    $('explain').innerHTML=`<div class="title" style="color:${G.track==='on'?'#11683a':'#9b1f1f'}">${s.title}</div>${s.body}${s.why?`<div class="why">${s.why}</div>`:''}`;
+    const s=STEPS[G.track][G.step], col=G.track==='on'?'#11683a':'#9b1f1f';
+    $('callout').textContent=`${G.track==='on'?'A':'B'}${G.step+1}. ${s.short}`;
+    $('callout').style.borderColor=col; $('callout').style.color=col;
+    $('explain').innerHTML=`<div class="title" style="color:${col}">${s.title}</div><div class="look">👀 <b>Look for:</b> ${s.call}</div>
+      <button class="moreBtn" id="moreBtn">${G.more?'▲ Hide the detail':'📖 What is happening? (more detail)'}</button>
+      <div class="detail" style="display:${G.more?'block':'none'}">${s.body}${s.why?`<div class="why">${s.why}</div>`:''}</div>`;
+    $('moreBtn').onclick=()=>{ G.more=!G.more; render(); };
     sw.style.display='none';
+    FOCUS[G.track][G.step].forEach(id=>$(id).classList.add('focus'));
+    if (FOCUS[G.track][G.step].includes('bZoom')) setTimeout(()=>{ const r=document.querySelector('.right'); r.scrollTop=r.scrollHeight; },50); else document.querySelector('.right').scrollTop=0;
   }
   $('next').textContent = (!G.free && G.track==='off' && G.step===4) ? 'Start again ↺' : (!G.free && G.track==='on' && G.step===4 ? 'Now disconnect (B1) ▶' : 'Next step ▶');
 }
@@ -547,7 +631,7 @@ $('next').onclick=()=>{ if (G.free) return goTo('on',0);
 $('back').onclick=()=>{ if (G.free) return goTo('on',0);
   if (G.step>0) goTo(G.track,G.step-1); else if (G.track==='off') goTo('on',4); };
 $('free').onclick=()=>{ G.free=true; S.manualConn=S.connected; render(); updateSw(); };
-function updateSw(){ const b=$('sw'); b.className='switch '+(S.manualConn?'on':'off'); b.textContent=S.manualConn?'CONNECTED: lamp on (tap to disconnect)':'DISCONNECTED (tap to connect)'; }
+function updateSw(){ const b=$('sw'); b.className='switch '+(S.manualConn?'on':'off'); b.textContent=S.manualConn?'Tap to disconnect':'Tap to connect'; }
 $('sw').onclick=()=>{ S.manualConn=!S.manualConn; setConnected(S.manualConn); updateSw(); };
 let PLAY=0.25;
 document.querySelectorAll('#speedSeg button').forEach(b=>b.onclick=()=>{ PLAY=+b.dataset.f; document.querySelectorAll('#speedSeg button').forEach(x=>x.classList.toggle('active',x===b)); });
@@ -566,9 +650,19 @@ function frame(now){
   if (draw3D) draw3D(dt, rdt, F);
   dial($('vDial'), S.emf, 1.2, 'V', 'pd', F.volt, '');
   dial($('aDial'), S.I, 0.5, 'A', 'current', F.amm, (F.amm && !S.connected) ? 'open circuit: 0 A' : '');
-  drawZoom(F); drawSpeed();
+  drawZoom(F); drawSpeed(); drawCircuit(dt, F);
   $('speedNum').textContent=(S.w/(2*Math.PI)).toFixed(1);
-  const gl=Math.min(1,Math.max(0,S.pow)/0.09);
+  const tr=$('trend'); let cls, html;
+  const tps=(S.w/(2*Math.PI)).toFixed(1);
+  if (S.acc > 0.3){ cls='up'; html=`▲ SPEEDING UP (${tps} turns/s)<small>${S.connected?'your push is bigger than the push-back + friction':'nothing pushes back now, only friction'}</small>`; }
+  else if (S.acc < -0.3){ cls='down'; html=`▼ SLOWING DOWN (${tps} turns/s)<small>${S.connected?'the push-back from the induced current is braking the coil':'friction slows it'}</small>`; }
+  else { cls='steady'; html=`● Steady speed (${tps} turns/s)<small>${S.connected?'SLOW: the push-back balances your push':'FAST: only friction balances your push'}</small>`; }
+  if (tr.className!=='trend '+cls) tr.className='trend '+cls;
+  if (tr.innerHTML!==html) tr.innerHTML=html;
+  const cs=$('circState');
+  const csHTML = S.connected ? '<span style="color:#11683a">✓ COMPLETE</span><small>current can flow to the lamp</small>' : '<span style="color:#9b1f1f">✗ BROKEN</span><small>switch open: no current can flow</small>';
+  if (cs.innerHTML!==csHTML) cs.innerHTML=csHTML;
+  const gl=S.connected ? Math.min(1,Math.max(0,S.pow)/0.09) : 0;
   $('lamp').style.background= gl>0.03?`rgb(255,${235-60*gl},${130-110*gl})`:'#fff';
   $('lamp').style.boxShadow= gl>0.03?`0 0 ${10+30*gl}px ${4+14*gl}px rgba(255,210,0,${0.75*gl})`:'none';
   requestAnimationFrame(frame);
