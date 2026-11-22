@@ -42,10 +42,11 @@
   .lab.push{color:var(--push);font-weight:700}
   .lab.move{color:var(--move);font-weight:700}
   .lab.hl{outline:3px solid var(--cut);font-weight:700}
-  .callout{position:absolute;left:10px;top:10px;max-width:58%;background:rgba(255,255,255,.95);border:2px solid var(--ink);border-radius:10px;padding:8px 11px;font-size:14px;line-height:1.35;pointer-events:none}
+  .callout{background:#fff;border:2px solid var(--ink);border-radius:10px;padding:8px 11px;font-size:14.5px;line-height:1.35;margin-bottom:8px;min-height:64px}
   .callout .t{font-weight:800;font-size:15px;margin-bottom:3px}
-  .dials{position:absolute;left:10px;bottom:10px;display:flex;gap:8px;pointer-events:none}
-  .dials canvas{width:150px;height:105px;background:rgba(255,255,255,.95);border:2px solid #333;border-radius:10px}
+  .dials{display:flex;gap:10px;align-items:center;margin-top:8px;flex-wrap:wrap}
+  .dialNote{font-size:12.5px;color:var(--muted);max-width:180px}
+  .dials canvas{width:170px;height:119px;background:rgba(255,255,255,.95);border:2px solid #333;border-radius:10px}
   .viewBtns{position:absolute;right:8px;top:8px}
   button.small{border:1px solid var(--line);background:#fff;border-radius:8px;padding:6px 10px;font-size:13px;cursor:pointer}
   .key{display:flex;flex-wrap:wrap;gap:12px;font-size:13px;margin-top:8px}
@@ -91,13 +92,13 @@
 
   <div class="card">
     <h2>Inside the alternator (Figure 17)</h2>
+    <div class="callout" id="callout"></div>
     <div class="stage" id="stage">
       <canvas id="three"></canvas>
       <div class="labels" id="labels"></div>
-      <div class="callout" id="callout"></div>
-      <div class="dials"><canvas id="vDial" width="300" height="210"></canvas><canvas id="aDial" width="300" height="210"></canvas></div>
       <div class="viewBtns"><button class="small" id="vFig">Reset view</button></div>
     </div>
+    <div class="dials"><canvas id="vDial" width="300" height="210"></canvas><canvas id="aDial" width="300" height="210"></canvas><span class="dialNote">Voltmeter and ammeter connected through the brushes</span></div>
     <div id="noGL">The 3D view could not load (it needs cdnjs.cloudflare.com). The close-up and the explanations still work.</div>
     <div class="key">
       <span><i style="background:var(--perm)"></i>Permanent field (magnets)</span>
@@ -224,8 +225,8 @@ function build3D(){
   const scene=new THREE.Scene(), camera=new THREE.PerspectiveCamera(34,1.5,0.1,100);
   scene.add(new THREE.AmbientLight(0xffffff,0.65));
   const dl=new THREE.DirectionalLight(0xffffff,0.6); dl.position.set(4,8,6); scene.add(dl);
-  const cam={az:0.55,el:0.38,dist:12.5};
-  $('vFig').onclick=()=>{cam.az=0.55;cam.el=0.38;cam.dist=12.5;};
+  const cam={az:0.55,el:0.38,dist:15.5};
+  $('vFig').onclick=()=>{cam.az=0.55;cam.el=0.38;cam.dist=15.5;};
   const pts=new Map();
   canvas.addEventListener('pointerdown',e=>{canvas.setPointerCapture(e.pointerId);pts.set(e.pointerId,{x:e.clientX,y:e.clientY});});
   canvas.addEventListener('pointermove',e=>{ if(!pts.has(e.pointerId))return; const p=pts.get(e.pointerId);
